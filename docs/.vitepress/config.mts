@@ -31,8 +31,15 @@ export default defineConfig({
     ],
 
     footer: {
-      message: 'Built with VitePress + Tailwind',
-      copyright: 'Copyright © 2026'
+      message: `
+        <span style="display:inline-flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center">
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" style="color:var(--vp-c-text-2);text-decoration:none">鲁ICP备2025204885号-1</a>
+          <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=37011202002577" target="_blank" rel="noopener noreferrer" style="color:var(--vp-c-text-2);text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+            <img src="/beian.png" alt="公安备案" style="width:14px;height:14px" />鲁公网安备37011202002577号
+          </a>
+        </span>
+      `,
+      copyright: 'Copyright © 2026 · Built with VitePress + Tailwind'
     },
 
     outline: {
