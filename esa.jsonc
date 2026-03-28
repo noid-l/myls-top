@@ -1,6 +1,8 @@
 {
-  "framework": "other",
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
-  "outputDirectory": "docs/.vitepress/dist"
+  "$schema": "https://esa.aliyun.com/schema/esa.jsonc",
+  "version": "1.0",
+  "build": {
+    "command": "npm install && npm run build",
+    "outputDirectory": "docs/.vitepress/dist"
+  }
 }
