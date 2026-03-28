@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 import tailwindcss from '@tailwindcss/vite'
+import { generateRSS } from './rss'
 
 export default defineConfig({
   lang: 'zh-CN',
@@ -15,8 +16,13 @@ export default defineConfig({
 
   head: [
     ['meta', { name: 'theme-color', content: '#0f172a' }],
-    ['meta', { property: 'og:type', content: 'website' }]
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['link', { rel: 'alternate', type: 'application/rss+xml', title: 'Shuo Blog RSS Feed', href: '/feed.xml' }]
   ],
+
+  async buildEnd({ outDir }) {
+    await generateRSS(outDir)
+  },
 
   themeConfig: {
     logo: '/favicon.ico',
