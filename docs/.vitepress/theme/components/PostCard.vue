@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <a :href="url" class="post-card block">
+  <a :href="url" class="post-card">
     <h3 class="post-card-title">{{ title }}</h3>
     <div class="post-card-meta">{{ date }}</div>
     <p v-if="description" class="post-card-desc">

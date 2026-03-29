@@ -12,16 +12,12 @@ const featured = posts[0]
   >
     <div class="hero-box group cursor-pointer">
       <div class="max-w-3xl">
-        <p class="text-sm font-medium uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
-          最新文章
-        </p>
-        <h1 class="mt-4 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+        <span class="page-kicker">Latest</span>
+        <h1 class="post-card-title mt-4 text-2xl md:text-3xl group-hover:!text-[var(--accent)]">
           {{ featured.title }}
         </h1>
-        <p class="mt-3 text-sm text-slate-400 dark:text-slate-500">
-          {{ featured.date }}
-        </p>
-        <p v-if="featured.description" class="mt-4 text-base leading-8 text-slate-600 md:text-lg dark:text-slate-300">
+        <div class="post-card-meta mt-3">{{ featured.date }}</div>
+        <p v-if="featured.description" class="post-card-desc mt-4 text-base md:text-lg leading-8">
           {{ featured.description }}
         </p>
         <div v-if="featured.tags?.length" class="mt-5 flex flex-wrap gap-2">
@@ -29,9 +25,9 @@ const featured = posts[0]
             {{ tag }}
           </span>
         </div>
-        <p class="mt-6 text-sm font-medium text-blue-600 dark:text-blue-400">
+        <span class="mt-6 inline-block text-sm font-medium" style="color: var(--accent)">
           阅读全文 →
-        </p>
+        </span>
       </div>
     </div>
   </a>
