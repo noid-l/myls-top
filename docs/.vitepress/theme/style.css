@@ -71,3 +71,100 @@
 .tag-chip {
   @apply inline-flex rounded-full border border-slate-200 px-2.5 py-1 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-300;
 }
+
+.page-hero {
+  @apply max-w-3xl;
+}
+
+.page-kicker {
+  @apply text-sm font-semibold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-400;
+}
+
+.page-intro {
+  @apply mt-4 text-base leading-7 text-slate-600 dark:text-slate-300;
+}
+
+.feature-panel {
+  @apply rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 md:p-8;
+}
+
+.panel-header {
+  @apply flex flex-wrap items-start justify-between gap-3;
+}
+
+.panel-title {
+  @apply text-xl font-semibold text-slate-900 dark:text-slate-100;
+}
+
+.panel-copy {
+  @apply mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400;
+}
+
+.stats-grid {
+  @apply grid grid-cols-1 gap-3 md:grid-cols-3;
+}
+
+.stat-tile {
+  @apply rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-slate-800 dark:bg-slate-950/60;
+}
+
+.stat-label {
+  @apply block text-xs font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400;
+}
+
+.stat-value {
+  @apply mt-2 block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-100;
+}
+
+.section-stack {
+  @apply space-y-8;
+}
+
+.tag-section {
+  @apply rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80;
+}
+
+.tag-section-header {
+  @apply flex flex-wrap items-center justify-between gap-3;
+}
+
+.tag-count {
+  @apply inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-300;
+}
+
+.page-search .pagefind-shell {
+  --pagefind-ui-primary: #2563eb;
+  --pagefind-ui-text: #0f172a;
+  --pagefind-ui-background: #ffffff;
+  --pagefind-ui-border: rgba(148, 163, 184, 0.35);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 1rem;
+  --pagefind-ui-font: inherit;
+}
+
+.dark .page-search .pagefind-shell {
+  --pagefind-ui-primary: #60a5fa;
+  --pagefind-ui-text: #e2e8f0;
+  --pagefind-ui-background: #0f172a;
+  --pagefind-ui-border: rgba(71, 85, 105, 0.7);
+}
+
+.page-search .pagefind-ui__search-input {
+  @apply text-lg shadow-sm;
+}
+
+.page-search .pagefind-ui__message {
+  @apply text-sm;
+}
+
+.page-search .pagefind-ui__result-link {
+  @apply text-slate-900 dark:text-slate-100;
+}
+
+.page-search .pagefind-ui__result-excerpt {
+  @apply leading-7 text-slate-600 dark:text-slate-300;
+}
+
+.page-search .pagefind-ui__button {
+  @apply transition-colors;
+}

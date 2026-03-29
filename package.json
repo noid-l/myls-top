@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev docs",
-    "build": "vitepress build docs && pagefind --site docs/.vitepress/dist --output-path docs/.vitepress/dist/pagefind",
+    "build": "vitepress build docs && pagefind --site docs/.vitepress/dist --output-path docs/.vitepress/dist/pagefind --exclude-selectors 'header,.VPLocalNav,.VPFooter,.VPFooter *,img[alt=\"公安备案\"]'",
     "preview": "vitepress preview docs"
   },
   "devDependencies": {

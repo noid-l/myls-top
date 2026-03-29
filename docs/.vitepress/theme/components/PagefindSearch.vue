@@ -5,6 +5,7 @@ declare global {
   interface Window {
     PagefindUI?: new (options: {
       element: HTMLElement
+      showImages?: boolean
       showSubResults?: boolean
       resetStyles?: boolean
       translations?: Record<string, string>
@@ -71,6 +72,7 @@ onMounted(async () => {
 
     new window.PagefindUI({
       element: container.value,
+      showImages: false,
       showSubResults: true,
       resetStyles: false,
       translations: {
