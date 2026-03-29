@@ -1,14 +1,19 @@
 import { defineConfig } from 'vitepress'
 import tailwindcss from '@tailwindcss/vite'
 import { generateRSS } from './rss'
+import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from './site'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: 'Shuo Blog',
-  description: 'AI / Coding / Notes',
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
 
   cleanUrls: true,
   lastUpdated: true,
+
+  sitemap: {
+    hostname: SITE_URL
+  },
 
   vite: {
     plugins: [tailwindcss()]
@@ -29,6 +34,8 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '文章', link: '/posts/' },
+      { text: '标签', link: '/tags/' },
+      { text: '搜索', link: '/search' },
       { text: '关于', link: '/about' }
     ],
 

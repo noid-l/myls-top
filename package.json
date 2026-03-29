@@ -4,11 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev docs",
-    "build": "vitepress build docs",
+    "build": "vitepress build docs && pagefind --site docs/.vitepress/dist --output-path docs/.vitepress/dist/pagefind",
     "preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.0",
+    "pagefind": "^1.4.0",
     "rss": "^1.2.2",
     "tailwindcss": "^4.1.0",
     "vitepress": "^2.0.0-alpha.12"

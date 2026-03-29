@@ -2,8 +2,7 @@ import { createContentLoader } from 'vitepress'
 import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import RSS from 'rss'
-
-const SITE_URL = 'https://myls.top'
+import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from './site'
 
 export async function generateRSS(outDir: string) {
   const posts = await createContentLoader('posts/*.md', {
@@ -16,8 +15,8 @@ export async function generateRSS(outDir: string) {
     .sort((a, b) => +new Date(b.frontmatter.date) - +new Date(a.frontmatter.date))
 
   const feed = new RSS({
-    title: 'Shuo Blog',
-    description: 'AI / Coding / Notes',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     site_url: SITE_URL,
     feed_url: `${SITE_URL}/feed.xml`,
     copyright: `Copyright ${new Date().getFullYear()} Shuo`,
