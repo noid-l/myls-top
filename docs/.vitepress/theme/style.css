@@ -88,13 +88,29 @@
 
 /* Nav */
 .VPNav {
-  background: color-mix(in srgb, var(--bg-base) 85%, transparent) !important;
+  background: color-mix(in srgb, var(--bg-base) 92%, transparent);
   backdrop-filter: blur(12px) saturate(1.2);
   -webkit-backdrop-filter: blur(12px) saturate(1.2);
 }
 
 .dark .VPNav {
-  background: color-mix(in srgb, var(--bg-base) 80%, transparent) !important;
+  background: color-mix(in srgb, var(--bg-base) 88%, transparent);
+}
+
+/* Mobile nav screen — solid background */
+.VPNavScreen {
+  background: var(--bg-base);
+}
+
+/* Ensure nav links readable */
+.VPNavScreenMenuLink,
+.VPNavScreenMenuGroupLink {
+  color: var(--text-1) !important;
+}
+
+.VPNavScreenMenuLink:hover,
+.VPNavScreenMenuGroupLink:hover {
+  color: var(--accent) !important;
 }
 
 /* Doc content width */
