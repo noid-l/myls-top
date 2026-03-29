@@ -2,7 +2,7 @@
 title: 文章
 ---
 
-<script setup>
+<script setup lang="ts">
 import { data as posts } from '../.vitepress/data/posts.data'
 </script>
 

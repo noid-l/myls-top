@@ -29,7 +29,7 @@ export default createContentLoader('posts/*.md', {
         date: formatDate(frontmatter.date),
         tags: frontmatter.tags ?? [],
         description: frontmatter.description ?? '',
-        cover: frontmatter.cover ?? ''
+        cover: frontmatter.cover || undefined
       }))
       .sort((a, b) => +new Date(b.date) - +new Date(a.date))
   }

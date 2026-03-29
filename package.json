@@ -4,14 +4,16 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev docs",
-    "build": "vitepress build docs && pagefind --site docs/.vitepress/dist --output-path docs/.vitepress/dist/pagefind --exclude-selectors 'header,.VPLocalNav,.VPFooter,.VPFooter *,img[alt=\"公安备案\"]'",
+    "build": "vitepress build docs",
     "preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.0",
+    "@types/node": "^25.5.0",
+    "@types/rss": "^0.0.32",
     "pagefind": "^1.4.0",
     "rss": "^1.2.2",
     "tailwindcss": "^4.1.0",
-    "vitepress": "^2.0.0-alpha.12"
+    "vitepress": "2.0.0-alpha.12"
   }
 }

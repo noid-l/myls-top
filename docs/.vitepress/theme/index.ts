@@ -1,4 +1,5 @@
 import DefaultTheme from 'vitepress/theme'
+import type { App } from 'vue'
 import './style.css'
 
 import HomePosts from './components/HomePosts.vue'
@@ -8,7 +9,7 @@ import PostCard from './components/PostCard.vue'
 
 export default {
   extends: DefaultTheme,
-  enhanceApp({ app }) {
+  enhanceApp({ app }: { app: App }) {
     app.component('HomePosts', HomePosts)
     app.component('HeroFeatured', HeroFeatured)
     app.component('PagefindSearch', PagefindSearch)

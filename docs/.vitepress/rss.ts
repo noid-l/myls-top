@@ -4,6 +4,18 @@ import { resolve } from 'node:path'
 import RSS from 'rss'
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from './site'
 
+interface RenderedPost {
+  url: string
+  frontmatter: {
+    title?: string
+    date: string
+    description?: string
+    tags?: string[]
+  }
+  html: string
+  rendered?: { html: string }
+}
+
 export async function generateRSS(outDir: string) {
   const posts = await createContentLoader('posts/*.md', {
     render: true,
@@ -24,14 +36,14 @@ export async function generateRSS(outDir: string) {
   })
 
   for (const post of filtered) {
-    const { url, frontmatter, html, rendered } = post as any
+    const { url, frontmatter, html, rendered } = post as unknown as RenderedPost
     feed.item({
       title: frontmatter.title ?? '未命名文章',
       url: `${SITE_URL}${url}`,
       date: new Date(frontmatter.date),
       description: frontmatter.description ?? '',
       categories: frontmatter.tags ?? [],
-      content: rendered?.html ?? html ?? ''
+      custom_elements: [{ 'content:encoded': { _cdata: rendered?.html ?? html ?? '' } }]
     })
   }
 

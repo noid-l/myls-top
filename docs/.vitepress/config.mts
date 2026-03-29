@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 import tailwindcss from '@tailwindcss/vite'
 import { generateRSS } from './rss'
+import { generatePagefind } from './pagefind'
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from './site'
 
 export default defineConfig({
@@ -22,11 +23,12 @@ export default defineConfig({
   head: [
     ['meta', { name: 'theme-color', content: '#0f172a' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['link', { rel: 'alternate', type: 'application/rss+xml', title: 'Shuo Blog RSS Feed', href: '/feed.xml' }]
+    ['link', { rel: 'alternate', type: 'application/rss+xml', title: `${SITE_TITLE} RSS Feed`, href: '/feed.xml' }]
   ],
 
   async buildEnd({ outDir }) {
     await generateRSS(outDir)
+    generatePagefind(outDir)
   },
 
   themeConfig: {
@@ -52,7 +54,7 @@ export default defineConfig({
           </a>
         </span>
       `,
-      copyright: 'Copyright © 2026 · Built with VitePress + Tailwind'
+      copyright: `Copyright © ${new Date().getFullYear()} · Built with VitePress + Tailwind`
     },
 
     outline: {

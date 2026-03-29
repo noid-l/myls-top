@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://myls.top/sitemap.xml
+Sitemap: https://www.myls.top/sitemap.xml
