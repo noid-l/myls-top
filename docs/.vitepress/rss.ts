@@ -8,7 +8,7 @@ interface VitePressPost {
   url: string
   frontmatter: {
     title?: string
-    date?: string
+    date?: string | Date
     description?: string
     tags?: string[]
     [key: string]: unknown
@@ -21,7 +21,7 @@ interface RenderedPost {
   url: string
   frontmatter: {
     title?: string
-    date: string
+    date: string | Date
     description?: string
     tags?: string[]
   }
@@ -31,11 +31,14 @@ interface RenderedPost {
 
 function isRenderedPost(post: unknown): post is RenderedPost {
   const p = post as Partial<VitePressPost>
+  const date = p.frontmatter?.date
+  const hasValidDate = typeof date === 'string' || date instanceof Date
+
   return (
     typeof p?.url === 'string' &&
     typeof p?.frontmatter === 'object' &&
     p.frontmatter !== null &&
-    typeof p.frontmatter.date === 'string' &&
+    hasValidDate &&
     (typeof p.html === 'string' || typeof p.rendered?.html === 'string')
   )
 }
