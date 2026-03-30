@@ -1,8 +1,9 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig, type HeadConfig } from 'vitepress'
 import tailwindcss from '@tailwindcss/vite'
 import { generateRSS } from './rss'
 import { generatePagefind } from './pagefind'
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from './site'
+import { parse } from 'node:path'
 
 export default defineConfig({
   lang: 'zh-CN',
@@ -34,6 +35,34 @@ export default defineConfig({
   async buildEnd({ outDir }) {
     await generateRSS(outDir)
     generatePagefind(outDir)
+  },
+
+  /** 为文章页注入 OG / Twitter Card meta */
+  transformHead({ pageData }): HeadConfig[] | void {
+    const relativePath = pageData.relativePath
+    const fm = pageData.frontmatter
+    const head: HeadConfig[] = []
+
+    // 文章页：/posts/xxxx.md
+    if (relativePath.startsWith('posts/') && !relativePath.endsWith('index.md')) {
+      const slug = parse(relativePath).name
+
+      head.push(['meta', { property: 'og:title', content: fm.title ?? SITE_TITLE }])
+      head.push(['meta', { property: 'og:description', content: fm.description ?? SITE_DESCRIPTION }])
+      head.push(['meta', { property: 'og:image', content: `${SITE_URL}/og/${slug}.png` }])
+      head.push(['meta', { property: 'og:type', content: 'article' }])
+      head.push(['meta', { name: 'twitter:card', content: 'summary_large_image' }])
+      head.push(['meta', { name: 'twitter:title', content: fm.title ?? SITE_TITLE }])
+      head.push(['meta', { name: 'twitter:description', content: fm.description ?? SITE_DESCRIPTION }])
+      head.push(['meta', { name: 'twitter:image', content: `${SITE_URL}/og/${slug}.png` }])
+    } else {
+      // 非文章页使用默认 OG 图
+      head.push(['meta', { property: 'og:image', content: `${SITE_URL}/og/default.png` }])
+      head.push(['meta', { name: 'twitter:card', content: 'summary_large_image' }])
+      head.push(['meta', { name: 'twitter:image', content: `${SITE_URL}/og/default.png` }])
+    }
+
+    return head
   },
 
   themeConfig: {

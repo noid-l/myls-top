@@ -4,13 +4,16 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev docs",
-    "build": "vitepress build docs",
+    "build": "node scripts/gen-og.mjs && vitepress build docs",
     "preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.0",
     "@types/node": "^25.5.0",
     "@types/rss": "^0.0.32",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
+    "node-html-to-image": "^5.0.0",
     "pagefind": "^1.4.0",
     "rss": "^1.2.2",
     "tailwindcss": "^4.1.0",
