@@ -11,7 +11,9 @@
   },
   "devDependencies": {
     "@rspress/core": "2.0.7",
+    "@rspress/plugin-llms": "2.0.7",
     "@rspress/plugin-rss": "2.0.7",
+    "@rspress/plugin-sitemap": "2.0.7",
     "@fontsource/noto-sans-sc": "^5.2.6",
     "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^25.5.0",

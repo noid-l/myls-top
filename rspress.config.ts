@@ -1,6 +1,8 @@
 import path from 'node:path'
 import { defineConfig, type UserConfig } from '@rspress/core'
+import { pluginLlms } from '@rspress/plugin-llms'
 import { pluginRss } from '@rspress/plugin-rss'
+import { pluginSitemap } from '@rspress/plugin-sitemap'
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL, GA_ID } from './src/lib/site'
 
 const footerMessage = `
@@ -117,6 +119,10 @@ const config = {
     }
   },
   plugins: [
+    pluginLlms(),
+    pluginSitemap({
+      siteUrl: SITE_URL
+    }),
     pluginRss({
       siteUrl: SITE_URL,
       output: {
