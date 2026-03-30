@@ -86,15 +86,28 @@
   background: var(--bg-base);
 }
 
-/* Nav */
+/* Nav — solid bg on mobile to avoid backdrop-filter containing-block bug */
 .VPNav {
-  background: color-mix(in srgb, var(--bg-base) 92%, transparent);
-  backdrop-filter: blur(12px) saturate(1.2);
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  background: var(--bg-base);
+}
+
+/* Glassmorphism only desktop (nav screen is display:none at ≥768px, so containing-block is moot) */
+@media (min-width: 768px) {
+  .VPNav {
+    background: color-mix(in srgb, var(--bg-base) 92%, transparent);
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  }
 }
 
 .dark .VPNav {
-  background: color-mix(in srgb, var(--bg-base) 88%, transparent);
+  background: var(--bg-base);
+}
+
+@media (min-width: 768px) {
+  .dark .VPNav {
+    background: color-mix(in srgb, var(--bg-base) 88%, transparent);
+  }
 }
 
 /* Mobile nav screen — solid background */
@@ -402,6 +415,134 @@
   color: var(--accent);
 }
 
+.posts-hero {
+  position: relative;
+}
+
+.posts-hero::after {
+  content: '';
+  position: absolute;
+  right: clamp(-1rem, -3vw, -2.5rem);
+  top: clamp(0.5rem, 2vw, 1.25rem);
+  width: clamp(7rem, 18vw, 12rem);
+  height: clamp(7rem, 18vw, 12rem);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--accent) 26%, transparent) 0%, transparent 58%),
+    radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 68%);
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.posts-lead-section {
+  padding-top: 1rem;
+}
+
+.posts-lead-section .panel-header {
+  align-items: center;
+  margin-bottom: 1.1rem;
+}
+
+.posts-lead-card {
+  position: relative;
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--border));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--bg-soft) 82%, var(--bg-base)) 0%, var(--bg-base) 100%);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none !important;
+  transition:
+    transform 0.3s var(--ease-out),
+    box-shadow 0.3s var(--ease-out),
+    border-color 0.3s ease;
+}
+
+.posts-lead-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border-strong));
+}
+
+.posts-lead-copy {
+  min-width: 0;
+}
+
+.posts-lead-meta,
+.posts-lead-label {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.posts-lead-meta {
+  font-size: 0.78rem;
+  color: var(--accent);
+}
+
+.posts-lead-title {
+  margin-top: 0.9rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.6vw, 2.5rem);
+  line-height: 1.12;
+  color: var(--text-1);
+}
+
+.posts-lead-desc {
+  margin-top: 1rem;
+  max-width: 44rem;
+  font-size: 0.98rem;
+  line-height: 1.9;
+  color: var(--text-2);
+}
+
+.posts-lead-side {
+  display: grid;
+  align-content: start;
+  gap: 0.9rem;
+  padding-top: 0.15rem;
+}
+
+.posts-lead-label {
+  font-size: 0.72rem;
+  color: var(--text-3);
+}
+
+.posts-lead-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.posts-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+
+@media (min-width: 768px) {
+  .posts-lead-section {
+    padding-top: 1.35rem;
+  }
+
+  .posts-lead-card {
+    grid-template-columns: minmax(0, 1.7fr) minmax(15rem, 0.9fr);
+    padding: 1.85rem;
+  }
+
+  .posts-grid {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .posts-lead-title {
+    font-size: 1.8rem;
+  }
+}
+
 /* ============================================================
    Pagefind Search
    ============================================================ */
@@ -480,6 +621,19 @@
 .home-grid .post-card:nth-child(5) { animation-delay: 0.25s; }
 .home-grid .post-card:nth-child(6) { animation-delay: 0.3s; }
 
+.posts-grid .post-card {
+  animation: fade-up 0.5s var(--ease-out) both;
+}
+
+.posts-grid .post-card:nth-child(1) { animation-delay: 0.05s; }
+.posts-grid .post-card:nth-child(2) { animation-delay: 0.1s; }
+.posts-grid .post-card:nth-child(3) { animation-delay: 0.15s; }
+.posts-grid .post-card:nth-child(4) { animation-delay: 0.2s; }
+.posts-grid .post-card:nth-child(5) { animation-delay: 0.25s; }
+.posts-grid .post-card:nth-child(6) { animation-delay: 0.3s; }
+.posts-grid .post-card:nth-child(7) { animation-delay: 0.35s; }
+.posts-grid .post-card:nth-child(8) { animation-delay: 0.4s; }
+
 .feature-panel,
 .stats-grid,
 .section-stack {
@@ -532,5 +686,23 @@
 
   .stats-grid {
     @apply grid-cols-1;
+  }
+
+  /* Tags page: tighter card padding & section spacing */
+  .tag-section {
+    padding: 1.125rem;
+  }
+
+  .tag-section-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .section-stack > :not(:first-child) {
+    margin-top: 1.25rem;
+  }
+
+  /* Homepage: reduce spacing between hero and post list */
+  .home-shell section.mt-14 {
+    margin-top: 2.5rem;
   }
 }
