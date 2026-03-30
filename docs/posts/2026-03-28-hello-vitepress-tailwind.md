@@ -6,7 +6,7 @@ tags:
   - TailwindCSS
   - Codex
 description: 一套适合开发者和 AI 写作工作流的博客模板。
-cover: /og/default-cover.png
+cover: /og/default.png
 ---
 
 # 用 VitePress + Tailwind 搭一个更适合 AI 的博客

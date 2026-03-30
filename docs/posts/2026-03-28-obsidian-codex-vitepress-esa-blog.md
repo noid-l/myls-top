@@ -10,7 +10,7 @@ tags:
 category: 工具链
 description: 一套更适合 AI 时代开发者的博客写作与发布方案：Obsidian 写作、Codex 辅助、VitePress 构建、ESA 部署。
 draft: false
-cover: /og/default-cover.png
+cover: /og/default.png
 ---
 
 # 我为什么放弃 NotionNext，转向 Obsidian + Codex + VitePress + ESA

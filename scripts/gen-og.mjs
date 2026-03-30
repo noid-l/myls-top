@@ -243,6 +243,10 @@ async function generateOG() {
   }
 
   console.log(`\n  📊 Generated: ${generated} | Skipped: ${skipped} | Failed: ${failed}\n`)
+
+  if (failed > 0) {
+    throw new Error(`OG generation failed for ${failed} item(s).`)
+  }
 }
 
 generateOG().catch(err => {
