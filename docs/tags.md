@@ -29,30 +29,7 @@ const totalPosts = posts.length
 </script>
 
 <div class="home-shell">
-  <div class="page-hero">
-    <p class="page-kicker">Topics</p>
-    <h1>标签</h1>
-    <p class="page-intro">
-      按主题浏览文章，适合快速回看某个技术栈、工具或实践方向的所有内容。
-    </p>
-  </div>
-
-  <div class="stats-grid mt-6">
-    <div class="stat-tile">
-      <span class="stat-label">标签总数</span>
-      <strong class="stat-value">{{ sections.length }}</strong>
-    </div>
-    <div class="stat-tile">
-      <span class="stat-label">文章总数</span>
-      <strong class="stat-value">{{ totalPosts }}</strong>
-    </div>
-    <div class="stat-tile">
-      <span class="stat-label">浏览方式</span>
-      <strong class="stat-value">按主题聚合阅读</strong>
-    </div>
-  </div>
-
-  <section class="feature-panel mt-8">
+  <section class="feature-panel mt-6 md:mt-8">
     <div class="panel-header">
       <div>
         <h2 class="panel-title">全部标签</h2>
@@ -71,7 +48,7 @@ const totalPosts = posts.length
     </div>
   </section>
 
-  <div class="section-stack mt-10">
+  <div class="section-stack mt-8 md:mt-10">
     <section
       v-for="section in sections"
       :key="section.tag"
