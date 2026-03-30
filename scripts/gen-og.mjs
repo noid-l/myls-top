@@ -1,168 +1,298 @@
-import nodeHtmlToImage from 'node-html-to-image'
+import { Resvg } from '@resvg/resvg-js'
 import fg from 'fast-glob'
 import matter from 'gray-matter'
-import { readFileSync, mkdirSync, existsSync } from 'node:fs'
-import { resolve, parse } from 'node:path'
+import satori from 'satori'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { parse, resolve } from 'node:path'
 
 const POSTS_DIR = 'docs/posts'
 const OUTPUT_DIR = 'docs/public/og'
 const SITE_NAME = '不想起名字'
+const OG_WIDTH = 1200
+const OG_HEIGHT = 630
 
-/** HTML 转义 */
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
+let fontCache = null
+
+function normalizeText(value) {
+  return String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
-/** 生成 OG 图 HTML 模板 */
-function buildTemplate({ title, description, tags }) {
-  const safeTitle = escapeHtml(title)
-  const safeDesc = escapeHtml(description || '')
-  const displayTags = (tags || []).slice(0, 3).map(t => escapeHtml(t))
-  const tagHtml = displayTags
-    .map(t => `<span style="display:inline-block;padding:4px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.15);font-size:14px;color:rgba(255,255,255,0.6);background:rgba(255,255,255,0.05)">${t}</span>`)
-    .join('')
+function clampText(value, maxLength) {
+  const text = normalizeText(value)
 
-  // 根据标题长度调整字号
-  const titleLen = title.length
-  const titleSize = titleLen > 40 ? 36 : titleLen > 28 ? 42 : 52
+  if (!text) {
+    return ''
+  }
 
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      width: 1200px;
-      height: 630px;
-      font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Hiragino Sans GB', sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 72px 80px 56px;
-      position: relative;
-      overflow: hidden;
-    }
-    /* 装饰：右上角光晕 */
-    body::after {
-      content: '';
-      position: absolute;
-      top: -120px;
-      right: -120px;
-      width: 420px;
-      height: 420px;
-      background: radial-gradient(circle, rgba(194,65,12,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    /* 装饰：左下角小光晕 */
-    body::before {
-      content: '';
-      position: absolute;
-      bottom: -80px;
-      left: -80px;
-      width: 280px;
-      height: 280px;
-      background: radial-gradient(circle, rgba(194,65,12,0.06) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .top-bar {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(90deg, #c2410c, #d97706, #b45309);
-    }
-    .content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      position: relative;
-      z-index: 1;
-    }
-    h1 {
-      font-size: ${titleSize}px;
-      font-weight: 700;
-      line-height: 1.3;
-      letter-spacing: -0.02em;
-      max-width: 960px;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .desc {
-      margin-top: 20px;
-      font-size: 20px;
-      line-height: 1.6;
-      color: rgba(255,255,255,0.5);
-      max-width: 800px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-      z-index: 1;
-    }
-    .tags {
-      display: flex;
-      gap: 10px;
-    }
-    .brand {
-      font-size: 16px;
-      color: rgba(255,255,255,0.3);
-      letter-spacing: 0.05em;
-    }
-    .brand-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #c2410c;
-      margin-right: 10px;
-      vertical-align: middle;
-    }
-  </style>
-</head>
-<body>
-  <div class="top-bar"></div>
-  <div class="content">
-    <h1>${safeTitle}</h1>
-    ${safeDesc ? `<p class="desc">${safeDesc}</p>` : ''}
-  </div>
-  <div class="footer">
-    <div class="tags">${tagHtml}</div>
-    <div class="brand"><span class="brand-dot"></span>${SITE_NAME}</div>
-  </div>
-</body>
-</html>
-`
+  if (text.length <= maxLength) {
+    return text
+  }
+
+  return `${text.slice(0, maxLength - 1).trimEnd()}…`
 }
 
-async function generateOG() {
+function normalizeTags(value) {
+  if (Array.isArray(value)) {
+    return value
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    return [value.trim()]
+  }
+
+  return []
+}
+
+function getTitleSize(title) {
+  const length = normalizeText(title).length
+
+  if (length > 40) {
+    return 36
+  }
+
+  if (length > 28) {
+    return 42
+  }
+
+  return 52
+}
+
+function el(type, props = {}, ...children) {
+  const normalizedChildren = children.flat().filter(child => child !== null && child !== undefined && child !== false)
+  const style = props.style ? { ...props.style } : undefined
+
+  if (
+    type === 'div' &&
+    normalizedChildren.length > 1 &&
+    style &&
+    !style.display
+  ) {
+    style.display = 'flex'
+  }
+
+  return {
+    type,
+    props: {
+      ...props,
+      ...(style ? { style } : {}),
+      children: normalizedChildren
+    }
+  }
+}
+
+function resolveFontFile(weight) {
+  const patterns = [
+    `node_modules/@fontsource/noto-sans-sc/files/*chinese-simplified*${weight}-normal.woff`,
+    `node_modules/@fontsource/noto-sans-sc/files/*latin*${weight}-normal.woff`,
+    `node_modules/@fontsource/noto-sans-sc/files/*${weight}-normal.woff`
+  ]
+
+  for (const pattern of patterns) {
+    const [match] = fg.sync(pattern, { onlyFiles: true })
+
+    if (match) {
+      return match
+    }
+  }
+
+  throw new Error(`Unable to locate a usable Noto Sans SC font file for weight ${weight}.`)
+}
+
+function loadFonts() {
+  if (fontCache) {
+    return fontCache
+  }
+
+  const regularPath = resolveFontFile(400)
+  const boldPath = resolveFontFile(700)
+
+  fontCache = [
+    {
+      name: 'Noto Sans SC',
+      data: readFileSync(regularPath),
+      weight: 400,
+      style: 'normal'
+    },
+    {
+      name: 'Noto Sans SC',
+      data: readFileSync(boldPath),
+      weight: 700,
+      style: 'normal'
+    }
+  ]
+
+  return fontCache
+}
+
+export function buildOgTree({ title, description, tags }) {
+  const displayTitle = clampText(title, 64)
+  const displayDescription = clampText(description, 110)
+  const displayTags = normalizeTags(tags).slice(0, 3).map(tag => clampText(tag, 18))
+  const titleSize = getTitleSize(displayTitle)
+
+  return el(
+    'div',
+    {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        width: OG_WIDTH,
+        height: OG_HEIGHT,
+        paddingTop: 72,
+        paddingRight: 80,
+        paddingBottom: 56,
+        paddingLeft: 80,
+        overflow: 'hidden',
+        color: '#ffffff',
+        backgroundColor: '#0f172a',
+        backgroundImage: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        borderTopWidth: 4,
+        borderTopStyle: 'solid',
+        borderTopColor: '#c2410c',
+        fontFamily: 'Noto Sans SC'
+      }
+    },
+    el(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flex: 1,
+          flexDirection: 'column',
+          justifyContent: 'center'
+        }
+      },
+      el(
+        'div',
+        {
+          style: {
+            display: 'flex',
+            width: 960,
+            fontSize: titleSize,
+            fontWeight: 700,
+            lineHeight: 1.3,
+            letterSpacing: -1.2,
+            color: '#ffffff',
+            wordBreak: 'break-word'
+          }
+        },
+        displayTitle
+      ),
+      displayDescription
+        ? el(
+            'div',
+            {
+              style: {
+                display: 'flex',
+                width: 800,
+                marginTop: 20,
+                fontSize: 20,
+                fontWeight: 400,
+                lineHeight: 1.6,
+                color: 'rgba(255,255,255,0.6)',
+                wordBreak: 'break-word'
+              }
+            },
+            displayDescription
+          )
+        : null
+    ),
+    el(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          width: '100%'
+        }
+      },
+      el(
+        'div',
+        {
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 10,
+            maxWidth: 860,
+            minHeight: 28
+          }
+        },
+        displayTags.map(tag =>
+          el(
+            'div',
+            {
+              style: {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingTop: 4,
+                paddingRight: 14,
+                paddingBottom: 4,
+                paddingLeft: 14,
+                borderRadius: 9999,
+                borderWidth: 1,
+                borderStyle: 'solid',
+                borderColor: 'rgba(255,255,255,0.15)',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                fontSize: 14,
+                color: 'rgba(255,255,255,0.72)'
+              }
+            },
+            tag
+          )
+        )
+      ),
+      el(
+        'div',
+        {
+          style: {
+            display: 'flex',
+            marginLeft: 24,
+            fontSize: 16,
+            letterSpacing: 0.8,
+            color: 'rgba(255,255,255,0.4)'
+          }
+        },
+        SITE_NAME
+      )
+    )
+  )
+}
+
+function renderPng(svg, outputPath) {
+  const pngData = new Resvg(svg, {
+    fitTo: {
+      mode: 'width',
+      value: OG_WIDTH
+    }
+  }).render().asPng()
+
+  writeFileSync(outputPath, pngData)
+}
+
+async function writeOgImage(input, outputPath) {
+  const svg = await satori(buildOgTree(input), {
+    width: OG_WIDTH,
+    height: OG_HEIGHT,
+    fonts: loadFonts()
+  })
+
+  renderPng(svg, outputPath)
+}
+
+export async function generateOG() {
   console.log('\n🖼  Generating OG images...\n')
 
-  // 确保输出目录存在
   if (!existsSync(OUTPUT_DIR)) {
     mkdirSync(OUTPUT_DIR, { recursive: true })
   }
 
-  // 扫描文章
   const files = fg.sync('*.md', {
     cwd: POSTS_DIR,
     ignore: ['index.md']
@@ -180,35 +310,26 @@ async function generateOG() {
       const raw = readFileSync(resolve(POSTS_DIR, file), 'utf-8')
       const { data: fm } = matter(raw)
 
-      // 跳过草稿
       if (fm.draft === true) {
         console.log(`  ⏭  Skipped (draft): ${slug}`)
         skipped++
         continue
       }
 
-      // 跳过无标题文章
       if (!fm.title) {
         console.log(`  ⚠️  Skipped (no title): ${slug}`)
         skipped++
         continue
       }
 
-      const html = buildTemplate({
-        title: fm.title,
-        description: fm.description,
-        tags: fm.tags
-      })
-
-      await nodeHtmlToImage({
-        output: outputPath,
-        html,
-        type: 'png',
-        quality: 90,
-        puppeteerArgs: {
-          args: ['--no-sandbox', '--disable-setuid-sandbox']
-        }
-      })
+      await writeOgImage(
+        {
+          title: fm.title,
+          description: fm.description,
+          tags: fm.tags
+        },
+        outputPath
+      )
 
       console.log(`  ✅ ${slug}.png`)
       generated++
@@ -218,24 +339,17 @@ async function generateOG() {
     }
   }
 
-  // 生成默认 OG 图（非文章页使用）
   try {
-    const defaultHtml = buildTemplate({
-      title: SITE_NAME,
-      description: 'AI 工具链 · 开发实践 · 网络与基础设施',
-      tags: ['AI', 'Coding', 'Notes']
-    })
+    await writeOgImage(
+      {
+        title: SITE_NAME,
+        description: 'AI 工具链 · 开发实践 · 网络与基础设施',
+        tags: ['AI', 'Coding', 'Notes']
+      },
+      resolve(OUTPUT_DIR, 'default.png')
+    )
 
-    await nodeHtmlToImage({
-      output: resolve(OUTPUT_DIR, 'default.png'),
-      html: defaultHtml,
-      type: 'png',
-      quality: 90,
-      puppeteerArgs: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      }
-    })
-    console.log(`  ✅ default.png`)
+    console.log('  ✅ default.png')
     generated++
   } catch (err) {
     console.error(`  ❌ Failed: default.png — ${err.message}`)
@@ -249,7 +363,9 @@ async function generateOG() {
   }
 }
 
-generateOG().catch(err => {
-  console.error('OG generation failed:', err)
-  process.exit(1)
-})
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  generateOG().catch(err => {
+    console.error('OG generation failed:', err)
+    process.exit(1)
+  })
+}
