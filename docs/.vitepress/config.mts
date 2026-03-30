@@ -2,7 +2,7 @@ import { defineConfig, type HeadConfig } from 'vitepress'
 import tailwindcss from '@tailwindcss/vite'
 import { generateRSS } from './rss'
 import { generatePagefind } from './pagefind'
-import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from './site'
+import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION, GA_ID } from './site'
 import { parse } from 'node:path'
 
 export default defineConfig({
@@ -24,20 +24,43 @@ export default defineConfig({
   head: [
     ['meta', { name: 'theme-color', content: '#1c1917' }],
     ['meta', { property: 'og:type', content: 'website' }],
+
+    // DNS 预解析和预连接
+    ['link', { rel: 'dns-prefetch', href: 'https://fonts.googleapis.com' }],
+    ['link', { rel: 'dns-prefetch', href: 'https://fonts.gstatic.com' }],
+    ['link', { rel: 'dns-prefetch', href: 'https://www.googletagmanager.com' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
+
+    // 字体优化：使用 font-display 减少阻塞
     ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap' }],
+
+    // 预加载关键资源
+    ['link', { rel: 'preload', href: '/favicon.ico', as: 'image', type: 'image/x-icon' }],
+
     ['link', { rel: 'alternate', type: 'application/rss+xml', title: `${SITE_TITLE} RSS Feed`, href: '/feed.xml' }],
-    ['script', { async: '', src: 'https://www.googletagmanager.com/gtag/js?id=G-KWQWPLB43Q' }],
-    ['script', {}, `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-KWQWPLB43Q')`]
+
+    // 延迟加载 Google Analytics
+    ['script', {}, `
+      window.dataLayer=window.dataLayer||[];
+      function gtag(){dataLayer.push(arguments)}
+      gtag('js',new Date());
+      window.addEventListener('load', function() {
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=${GA_ID}';
+        document.body.appendChild(script);
+        gtag('config','${GA_ID}');
+      });
+    `]
   ],
 
   async buildEnd({ outDir }) {
     await generateRSS(outDir)
-    generatePagefind(outDir)
+    await generatePagefind(outDir)
   },
 
-  /** 为文章页注入 OG / Twitter Card meta */
+  /** 为文章页注入 OG / Twitter Card meta 和结构化数据 */
   transformHead({ pageData }): HeadConfig[] | void {
     const relativePath = pageData.relativePath
     const fm = pageData.frontmatter
@@ -55,6 +78,37 @@ export default defineConfig({
       head.push(['meta', { name: 'twitter:title', content: fm.title ?? SITE_TITLE }])
       head.push(['meta', { name: 'twitter:description', content: fm.description ?? SITE_DESCRIPTION }])
       head.push(['meta', { name: 'twitter:image', content: `${SITE_URL}/og/${slug}.png` }])
+
+      // 添加结构化数据（JSON-LD）
+      const structuredData = {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        'headline': fm.title ?? SITE_TITLE,
+        'datePublished': fm.date,
+        'dateModified': fm.date,
+        'description': fm.description ?? SITE_DESCRIPTION,
+        'url': `${SITE_URL}${pageData.relativePath.replace(/\.md$/, '')}`,
+        'author': {
+          '@type': 'Person',
+          'name': 'Shuo',
+          'url': SITE_URL
+        },
+        'publisher': {
+          '@type': 'Organization',
+          'name': SITE_TITLE,
+          'logo': {
+            '@type': 'ImageObject',
+            'url': `${SITE_URL}/favicon.ico`
+          }
+        },
+        'image': `${SITE_URL}/og/${slug}.png`
+      }
+
+      head.push([
+        'script',
+        { type: 'application/ld+json' },
+        JSON.stringify(structuredData)
+      ])
     } else {
       // 非文章页使用默认 OG 图
       head.push(['meta', { property: 'og:image', content: `${SITE_URL}/og/default.png` }])
