@@ -6,3 +6,11 @@ docs/.obsidian
 .claude
 *.png
 !docs/public/**
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# User scripts
+batp_fixed.sh

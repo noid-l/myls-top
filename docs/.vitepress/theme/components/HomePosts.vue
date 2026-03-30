@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { data as posts } from '../../data/posts.data'
+import { usePosts } from '../composables/usePosts'
 
-const latestPosts = posts.slice(0, 6)
+const { latestPosts } = usePosts()
 </script>
 
 <template>

@@ -4,16 +4,43 @@ import { resolve } from 'node:path'
 import RSS from 'rss'
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from './site'
 
+interface VitePressPost {
+  url: string
+  frontmatter: {
+    title?: string
+    date?: string | Date
+    description?: string
+    tags?: string[]
+    [key: string]: unknown
+  }
+  html?: string
+  rendered?: { html: string }
+}
+
 interface RenderedPost {
   url: string
   frontmatter: {
     title?: string
-    date: string
+    date: string | Date
     description?: string
     tags?: string[]
   }
   html: string
   rendered?: { html: string }
+}
+
+function isRenderedPost(post: unknown): post is RenderedPost {
+  const p = post as Partial<VitePressPost>
+  const date = p.frontmatter?.date
+  const hasValidDate = typeof date === 'string' || date instanceof Date
+
+  return (
+    typeof p?.url === 'string' &&
+    typeof p?.frontmatter === 'object' &&
+    p.frontmatter !== null &&
+    hasValidDate &&
+    (typeof p.html === 'string' || typeof p.rendered?.html === 'string')
+  )
 }
 
 export async function generateRSS(outDir: string) {
@@ -36,7 +63,12 @@ export async function generateRSS(outDir: string) {
   })
 
   for (const post of filtered) {
-    const { url, frontmatter, html, rendered } = post as unknown as RenderedPost
+    if (!isRenderedPost(post)) {
+      console.warn('Skipping post with invalid structure:', post)
+      continue
+    }
+
+    const { url, frontmatter, html, rendered } = post
     feed.item({
       title: frontmatter.title ?? '未命名文章',
       url: `${SITE_URL}${url}`,

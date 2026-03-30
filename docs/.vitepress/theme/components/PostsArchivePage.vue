@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { data as posts } from '../../data/posts.data'
+import { usePosts } from '../composables/usePosts'
 
-const [featuredPost, ...archivePosts] = posts
+const { featuredPost, archivePosts } = usePosts()
 </script>
 
 <template>
