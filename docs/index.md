@@ -2,9 +2,9 @@
 layout: home
 title: 首页
 hero:
-  name: Shuo Blog
-  text: AI × Coding × Notes
-  tagline: 用 Obsidian 写作，用 Codex 辅助创作，用 VitePress 发布
+  name: 不想起名字
+  text: 写代码，记笔记，偶尔折腾
+  tagline: AI 工具链 · 开发实践 · 网络与基础设施
   actions:
     - theme: brand
       text: 开始阅读
