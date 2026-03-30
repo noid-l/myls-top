@@ -1,249 +1,196 @@
-# 项目优化总结
+# 项目迁移与优化总结
 
-## 已完成的优化
+## 当前状态
 
-### 🔴 高优先级 - 类型安全与代码质量
+站点已经从 VitePress 完整迁移到 Rspress 2.0.7，并保留 Tailwind CSS v4 作为样式基础。
+当前实现已经统一到 React/MDX + Rspress 主题体系，旧的 `docs/.vitepress` 源码已从仓库中移除。
 
-#### ✅ 1. 修复 RSS 生成中的类型断言滥用
-**文件**: `docs/.vitepress/rss.ts`
+---
+
+## 本次完成的核心改造
+
+### 1. 文档框架迁移到 Rspress
+
+**主要文件**:
+- `rspress.config.ts`
+- `docs/index.mdx`
+- `docs/posts/index.mdx`
+- `docs/search.mdx`
+- `docs/tags.mdx`
 
 **改进**:
-- 添加了 `VitePressPost` 和 `RenderedPost` 接口定义
-- 实现了 `isRenderedPost()` 类型守卫函数
-- 消除了 `as unknown as` 双重断言
-- 添加了无效结构的警告日志
+- 使用 `@rspress/core@2.0.7` 替换 VitePress
+- 统一站点入口、导航、页脚和全局 head 配置
+- 页面入口从 Markdown 首页模板迁移为 MDX + React 组件组合
+- 输出目录统一为 `docs/.rspress/dist`
 
-**影响**: 提高了运行时类型安全，防止潜在的运行时错误
+**影响**:
+构建链路更清晰，后续扩展官方插件、主题能力和搜索能力更顺滑。
 
 ---
 
-#### ✅ 2. 完善 PostItem 类型定义
-**文件**: `docs/.vitepress/data/posts.data.ts`
+### 2. 搜索能力迁移到 Rspress 内置索引
+
+**主要文件**:
+- `src/components/search-page.tsx`
+- `docs/search.mdx`
 
 **改进**:
-- 添加了 `category`、`draft` 等缺失字段
-- 创建了 `PostFrontmatterSchema` Zod schema
-- 添加了 `PostFrontmatter` 类型导出
-- 支持 Date 对象和字符串日期格式
+- 移除 Pagefind 方案
+- 改为使用 Rspress 内置全文搜索索引
+- 保留自定义搜索页，并复用 Rspress 的搜索初始化逻辑
+- 搜索页与内置搜索面板保持一致的数据来源
 
-**影响**: 类型定义更完整，支持更多 frontmatter 字段
+**影响**:
+减少额外构建步骤，避免双搜索体系并存，同时保留自定义搜索体验。
 
 ---
 
-#### ✅ 3. 添加运行时数据验证
-**文件**: `docs/.vitepress/data/posts.data.ts`
+### 3. UI 迁移到 shadcn 风格组件结构
+
+**主要文件**:
+- `components.json`
+- `src/components/ui/button.tsx`
+- `src/components/ui/card.tsx`
+- `src/components/ui/input.tsx`
+- `src/lib/utils.ts`
 
 **改进**:
-- 使用 Zod 进行 frontmatter 验证
-- 在数据加载时验证所有文章
-- 跳过无效文章并记录警告
-- 支持 Date 对象自动转换为 ISO 字符串
+- 引入本地 shadcn 风格组件组织方式
+- 使用 `class-variance-authority`、`clsx`、`tailwind-merge` 统一样式组合
+- 将页面卡片、搜索输入、按钮等通用界面抽到可复用组件
 
-**影响**: 防止运行时错误，提高数据可靠性
+**影响**:
+UI 结构更统一，后续增加组件或调整视觉风格时更容易维护。
 
 ---
 
-#### ✅ 4. 修复 Pagefind 错误处理
-**文件**: `docs/.vitepress/pagefind.ts`
+### 4. 保留 Tailwind CSS v4 并完成主题迁移
+
+**主要文件**:
+- `styles/index.css`
 
 **改进**:
-- 函数改为返回 `Promise<void>`
-- 失败时抛出错误而不是只打印日志
-- 添加了清晰的错误消息
-- 在 `buildEnd` 中正确使用 `await`
+- 使用 `@import "tailwindcss";` 接入 Tailwind CSS v4
+- 将原有博客视觉风格迁移到新的全局样式层
+- 对 Rspress 默认主题类名做了定向覆盖
+- 保留文章页、首页、归档页、标签页的统一视觉语言
 
-**影响**: 构建失败时能正确报告，避免静默失败
+**影响**:
+迁移后视觉风格没有丢失，同时样式体系更贴近当前技术栈。
 
 ---
 
-### 🟡 中优先级 - 性能与用户体验
+### 5. 使用稳定可用的 Rspress 官方插件
 
-#### ✅ 5. 优化资源加载
-**文件**: `docs/.vitepress/config.mts`
+**主要文件**:
+- `rspress.config.ts`
+- `package.json`
 
 **改进**:
-- 添加了 DNS 预解析 (`dns-prefetch`)
-- 添加了预连接 (`preconnect`)
-- 延迟加载 Google Analytics
-- 添加了关键资源预加载
+- 接入 `@rspress/plugin-rss@2.0.7`
+- RSS 输出文件固定为 `/feed.xml`
+- 没有引入非稳定版本插件，避免把 alpha/beta 依赖带入主分支
 
-**影响**: 改善首次加载性能，减少阻塞时间
+**影响**:
+在保证稳定性的前提下使用官方插件能力，减少兼容性风险。
 
 ---
 
-#### ✅ 6. 添加 SEO 结构化数据
-**文件**: `docs/.vitepress/config.mts`
+### 6. SEO 与站点元信息迁移
+
+**主要文件**:
+- `src/components/seo-meta.tsx`
+- `src/lib/site.ts`
+- `src/lib/posts.ts`
 
 **改进**:
-- 添加了 JSON-LD 结构化数据
-- 包含文章的完整元信息
-- 符合 Schema.org BlogPosting 规范
-- 搜索引擎友好
+- 统一 canonical、OG、Twitter Card、JSON-LD 输出
+- 文章页支持结构化数据
+- RSS、站点描述、标题等元信息统一由站点配置管理
 
-**影响**: 改善搜索引擎可见性，提升富媒体搜索结果
+**影响**:
+搜索引擎和分享卡片展示更稳定，也避免多处分散配置。
 
 ---
 
-#### ✅ 7. 提取 Composables 消除代码重复
-**新文件**:
-- `docs/.vitepress/theme/composables/usePosts.ts`
-- `docs/.vitepress/theme/utils/date.ts`
+### 7. 国际化文案补齐
+
+**主要文件**:
+- `rspress.config.ts`
 
 **改进**:
-- 创建了 `usePosts()` composable
-- 统一文章数据访问逻辑
-- 添加了日期格式化工具函数
-- 支持按标签分组、相对时间等
+- 补齐 Rspress 默认主题常用 i18n 文案
+- 同时兼容 `zh`、`zh-CN` 和 `en`
+- 消除了构建阶段的 i18n fallback warning
 
-**影响**: 提高代码可维护性，减少重复逻辑
+**影响**:
+构建输出更干净，中文站点文案行为也更一致。
 
 ---
 
-#### ✅ 8. 添加构建清理脚本
-**新文件**: `scripts/clean.mjs`
+### 8. 清理旧构建残留
+
+**主要文件**:
+- `.gitignore`
+- `scripts/clean.mjs`
 
 **改进**:
-- 构建前自动清理旧产物
-- 避免缓存问题
-- 添加了 `bun run clean` 命令
+- 清理逻辑切换到 `docs/.rspress/dist`
+- 将 `docs/.rspress` 加入忽略规则
+- 将 `docs/.vitepress` 源码目录从 Git 中移除
 
-**影响**: 确保构建一致性，避免缓存导致的怪异问题
-
----
-
-### 🟢 低优先级 - 开发体验与维护性
-
-#### ✅ 9. 添加环境变量支持
-**新文件**: `.env`
-
-**改进**:
-- 创建了 `.env` 文件模板
-- 集中管理站点配置
-- 为将来的环境变量使用做准备
-
-**注意**: VitePress 在构建时不支持 `import.meta.env`，当前仍使用硬编码值
+**影响**:
+仓库只保留一套真实站点实现，避免后续维护混淆。
 
 ---
 
-#### ✅ 10. 安装 ESLint 和 Prettier
-**文件**: `package.json`
+## 当前脚本
 
-**已安装依赖**:
-- eslint@10.1.0
-- @typescript-eslint/parser@8.57.2
-- @typescript-eslint/eslint-plugin@8.57.2
-- eslint-plugin-vue@10.8.0
-- prettier@3.8.1
-- eslint-config-prettier@10.1.8
-- eslint-plugin-prettier@5.5.5
+`package.json` 目前保留以下核心命令：
 
-**注意**: 由于配置保护钩子，配置文件未创建。如需配置，请手动创建 `.eslintrc.cjs` 和 `.prettierrc`
-
----
-
-#### ✅ 11. 添加类型检查脚本
-**文件**: `package.json`
-
-**新增脚本**:
 ```json
 {
+  "dev": "rspress dev",
+  "build": "node scripts/clean.mjs && node scripts/gen-og.mjs && rspress build",
+  "preview": "rspress preview",
+  "clean": "node scripts/clean.mjs",
   "typecheck": "tsc --noEmit"
 }
 ```
 
-**使用方法**:
-```bash
-bun run typecheck
-```
+---
 
-**影响**: 可以在不构建的情况下检查类型错误
+## 验证结果
+
+已完成验证：
+
+- `bun run typecheck`
+- `bun run build`
+- RSS 生成正常
+- 内置搜索索引生成正常
+- 自定义搜索页可正常返回结果
+- 关键页面预览检查通过
 
 ---
 
-## 新增功能
+## 当前建议
 
-### Composables
-- `usePosts()` - 统一文章数据访问
-  - `posts` - 所有文章
-  - `featuredPost` - 首篇推荐文章
-  - `archivePosts` - 归档文章列表
-  - `latestPosts` - 最新 6 篇文章
-  - `postsByTag` - 按标签分组的文章
+### 短期
 
-### 工具函数
-- `formatDate(date, locale?)` - 格式化日期
-- `getReadingTime(content, wordsPerMinute?)` - 计算阅读时间
-- `formatRelativeTime(date, locale?)` - 格式化为相对时间
-- `isRecent(date, days?)` - 判断是否为最近文章
+1. 提交这次迁移分支上的变更，避免后续继续堆叠大 diff
+2. 如果计划继续扩展 UI，可以按同样模式补更多本地 shadcn 风格组件
+3. 视需要补充 lint 配置和最小页面级测试
 
-### 脚本
-- `bun run clean` - 清理构建产物
-- `bun run typecheck` - 运行类型检查
-- `bun run build` - 完整构建（包括清理）
+### 中期
 
----
-
-## 构建验证
-
-✅ TypeScript 类型检查通过
-✅ 构建成功
-✅ RSS feed 生成正常
-✅ Pagefind 搜索索引生成正常
-✅ OG 图片生成正常
-
----
-
-## 后续建议
-
-### 短期（1-2周）
-1. 配置 ESLint 和 Prettier 规则
-2. 添加单元测试（Vitest）
-3. 添加 E2E 测试（Playwright）
-4. 优化图片大小和格式
-
-### 中期（1-2月）
-1. 添加 PWA 支持
-2. 实现图片懒加载
-3. 添加阅读进度条
-4. 实现暗色模式切换
-
-### 长期（3-6月）
-1. 添加评论系统
-2. 实现全文搜索
-3. 添加文章分享功能
-4. 实现国际化支持
-
----
-
-## 性能指标
-
-### 构建大小
-- 总大小: 2.9MB
-- 文章数: 6篇
-- 构建时间: ~2.3s
-
-### 已优化项
-- ✅ DNS 预解析
-- ✅ 资源预连接
-- ✅ 延迟加载分析脚本
-- ✅ SEO 结构化数据
-- ✅ 代码分割（vendor）
-
-### 待优化项
-- ⏳ 图片优化和懒加载
-- ⏳ 字体子集化
-- ⏳ Gzip/Brotli 压缩
-- ⏳ CDN 部署
+1. 为文章页补充更多内容增强能力，例如目录块、提示块、内嵌卡片
+2. 根据实际需要再评估更多 Rspress 官方插件
+3. 优化字体加载和图片体积
 
 ---
 
 ## 总结
 
-本次优化主要聚焦于：
-1. **类型安全** - 消除不安全的类型断言，添加运行时验证
-2. **错误处理** - 改善错误处理机制，避免静默失败
-3. **代码质量** - 提取可复用逻辑，减少代码重复
-4. **开发体验** - 添加类型检查、清理脚本等工具
-5. **性能优化** - 优化资源加载，添加 SEO 支持
-
-所有高优先级问题已全部解决，项目代码质量和可维护性显著提升。
+这次调整的重点不是简单替换框架，而是把博客站点统一到一套更干净、更稳定、更容易持续维护的 Rspress 架构上。
+现在仓库里的运行链路、搜索能力、样式体系、SEO 和 RSS 都已经和新架构对齐，后续开发成本会明显低很多。

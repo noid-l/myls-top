@@ -1,5 +1,5 @@
 ---
-layout: home
+pageType: home
 title: 首页
 hero:
   name: 不想起名字
@@ -11,10 +11,13 @@ hero:
       link: /posts/
     - theme: alt
       text: 关于我
-      link: /about
+      link: /about/
 ---
 
-<div class="home-shell -mt-2">
+import HeroFeatured from '@/components/hero-featured'
+import HomePosts from '@/components/home-posts'
+
+<div className="home-shell -mt-2">
   <HeroFeatured />
 </div>
 

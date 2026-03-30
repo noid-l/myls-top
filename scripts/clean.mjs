@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const rootDir = resolve(__dirname, '..')
-const distDir = resolve(rootDir, 'docs/.vitepress/dist')
+const distDir = resolve(rootDir, 'docs/.rspress/dist')
 
 console.log('🧹 清理构建产物...')
 
