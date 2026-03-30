@@ -1,0 +1,14 @@
+# Git Commit Message Template
+
+## When using Claude Code to commit:
+
+Use this pattern to avoid cat alias issues:
+
+\`\`\`bash
+git commit -m "$(/bin/cat <<'EOF'
+Your commit message here
+EOF
+)"
+\`\`\`
+
+The key is to use `/bin/cat` instead of `cat` to bypass the batp alias.
