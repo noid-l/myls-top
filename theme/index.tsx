@@ -1,3 +1,4 @@
+import './index.css'
 import { HomeLayout as OriginalHomeLayout } from '@rspress/core/theme-original'
 import HeroFeatured from '../src/components/hero-featured'
 import HomePosts from '../src/components/home-posts'
