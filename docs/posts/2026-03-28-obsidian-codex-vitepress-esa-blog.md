@@ -15,8 +15,6 @@ cover: /og/default.png
 
 # 我为什么放弃 NotionNext，转向 Obsidian + Codex + VitePress + ESA
 
-> 编者注：本文写于 2026-03-28，记录的是当时切换到 VitePress 的原因和过程。站点已于 2026-03-30 迁移到 Rspress 2.0.7，但这篇文章作为当时决策背景保留原貌，仅做迁移说明，不改写原始结论。
-
 过去一段时间，我一直在用 NotionNext 写博客。
 它并不是不能用，但越往后用，越能感觉到一个问题：
 

@@ -3,19 +3,12 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "target": "ESNext",
-    "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "types": ["node"]
+    "types": ["vite/client"]
   },
   "include": [
-    "docs/**/*.mdx",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "rspress.config.ts"
+    "docs/.vitepress/**/*.ts",
+    "docs/.vitepress/**/*.vue"
   ]
 }

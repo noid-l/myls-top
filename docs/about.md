@@ -1,10 +1,3 @@
----
-title: 关于
-pageType: custom
-sidebar: false
-outline: false
----
-
 # 关于
 
 我是一个偏工程实践路线的开发者，关注这些方向：
@@ -18,6 +11,6 @@ outline: false
 
 - Obsidian 写作
 - Codex 辅助创作与改稿
-- Rspress 构建
+- VitePress 构建
 - Tailwind 美化
 - ESA Pages 部署

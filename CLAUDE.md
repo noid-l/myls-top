@@ -4,65 +4,57 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-个人博客站点，域名 `www.myls.top`。当前使用 `Rspress 2.0.7 + Tailwind CSS v4` 构建静态站点，通过 ESA（Edge Side Architecture）部署。
+个人博客站点，域名 www.myls.top。使用 VitePress 2.x (alpha) + Tailwind CSS 4 构建静态站点，通过 ESA（Edge Side Architecture）部署。
 
 ## Commands
 
 ```bash
-bun run dev
-bun run build
-bun run preview
-bun run typecheck
+bun run dev          # 开发服务器 (VitePress dev)
+bun run build        # 构建静态站点（RSS + Pagefind 在 buildEnd 钩子中自动生成）
+bun run preview      # 预览构建产物
 ```
 
-说明：
-
-- `bun run build` 会先生成 OG 图片，再执行 Rspress 构建
-- 站内搜索使用 Rspress 内置全文搜索索引
-- RSS 使用 `@rspress/plugin-rss`
+**注意**: Pagefind 搜索索引和 RSS feed 在 VitePress `buildEnd` 钩子中生成（见 `config.mts`），搜索功能只在 `build` 后的 `preview` 中可用，`dev` 模式下不可用。
 
 ## Architecture
 
-```text
+```
 docs/
+├── .vitepress/
+│   ├── config.mts          # VitePress 主配置（导航、SEO、RSS/Pagefind buildEnd hook）
+│   ├── site.ts             # 站点元数据（URL、标题、描述），被 config 和 RSS 共用
+│   ├── rss.ts              # buildEnd 钩子生成 feed.xml
+│   ├── pagefind.ts         # buildEnd 钩子生成全文搜索索引
+│   ├── data/
+│   │   └── posts.data.ts   # VitePress content loader，扫描 posts/*.md 生成 PostItem[]
+│   └── theme/
+│       ├── index.ts        # 扩展默认主题，注册全局 Vue 组件
+│       ├── style.css       # Tailwind 导入 + VitePress 变量覆盖 + 自定义布局类
+│       └── components/     # Vue 组件
+│           ├── HeroFeatured.vue   # 首页最新文章展示卡
+│           ├── HomePosts.vue      # 首页文章列表（取前6篇）
+│           ├── PostCard.vue       # 文章卡片（用于列表/标签页）
+│           └── PagefindSearch.vue # Pagefind 搜索 UI 封装
 ├── posts/                  # 博客文章（Markdown + frontmatter）
-├── index.mdx              # 首页
-├── posts/index.mdx        # 文章归档页
-├── tags.mdx               # 标签聚合页
-├── search.mdx             # 搜索页
-└── about.md               # 关于页
-
-src/
-├── components/
-│   ├── hero-featured.tsx
-│   ├── home-posts.tsx
-│   ├── post-card.tsx
-│   ├── posts-archive-page.tsx
-│   ├── search-page.tsx
-│   ├── seo-meta.tsx
-│   ├── tags-page.tsx
-│   └── ui/                # shadcn 风格基础组件
-├── lib/
-│   ├── posts.ts           # 文章筛选/排序/slug/date 逻辑
-│   ├── site.ts            # 站点常量
-│   └── utils.ts           # cn() 工具函数
-styles/
-└── index.css              # Tailwind v4 入口 + 站点主题样式
+├── index.md                # 首页
+├── tags.md                 # 标签聚合页
+├── search.md               # 搜索页
+└── about.md                # 关于页
 ```
 
-## Data Flow
+### 数据流
 
-1. Rspress 在运行时通过 `usePages()` 暴露页面索引。
-2. `src/lib/posts.ts` 从页面索引中过滤 `/posts/*` 页面，并按日期倒序生成博客文章列表。
-3. 首页、文章归档页、标签页都复用这套运行时数据。
-4. `src/components/seo-meta.tsx` 作为全局 UI 组件，根据当前页面注入 OG、Twitter Card 和文章 JSON-LD。
+1. `posts.data.ts` 用 `createContentLoader('posts/*.md')` 扫描文章目录
+2. 文章 frontmatter 格式: `title`, `date`, `tags[]`, `description`, `cover`(可选)
+3. 数据按日期降序排列，通过 `import { data as posts }` 在 .md 和 .vue 中使用
+4. 标签页 (`tags.md`) 和文章列表页 (`posts/index.md`) 都直接消费此数据
 
-## Styling
+### 样式系统
 
-- Tailwind CSS v4 通过 `styles/index.css` 中的 `@import "tailwindcss"` 接入
-- Rspress 默认主题负责导航、文档布局和内置搜索索引
-- 自定义品牌样式仍然集中在 `styles/index.css`
-- 交互组件采用 shadcn 风格组织方式：`components.json` + `src/components/ui/*`
+- Tailwind CSS 4 通过 `@tailwindcss/vite` 插件集成，在 `style.css` 中用 `@import "tailwindcss"` 导入
+- VitePress 主题变量在 `:root` 和 `.dark` 中覆盖
+- 自定义布局类（`.home-shell`, `.post-card`, `.hero-box` 等）用 Tailwind `@apply` 定义
+- Pagefind 搜索通过 CSS 变量定制主题
 
 ## Adding a New Post
 
@@ -81,11 +73,11 @@ description: 文章摘要
 
 ## Key Dependencies
 
-- `@rspress/core`: `2.0.7`
-- `@rspress/plugin-rss`: `2.0.7`
-- `tailwindcss`: `^4.1.0`
-- `class-variance-authority` + `clsx` + `tailwind-merge`: shadcn 风格组件基础
+- **vitepress**: 2.0.0-alpha.12 — 精确锁定 alpha 版本
+- **tailwindcss** + **@tailwindcss/vite**: ^4.1.0 — Tailwind v4
+- **pagefind**: ^1.4.0 — 静态全文搜索
+- **rss**: ^1.2.2 — RSS feed 生成
 
 ## Deployment
 
-`esa.jsonc` 的构建产物目录是 `docs/.rspress/dist`，仍然使用 SPA 模式 (`notFoundStrategy: "singlePageApplication"`)。
+`esa.jsonc` 配置 ESA 部署，构建产物目录为 `docs/.vitepress/dist`，使用 SPA 模式 (`notFoundStrategy: "singlePageApplication"`)。

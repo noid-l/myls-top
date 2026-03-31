@@ -1,0 +1,83 @@
+import { createContentLoader } from 'vitepress'
+import { writeFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import RSS from 'rss'
+import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from './site'
+
+interface VitePressPost {
+  url: string
+  frontmatter: {
+    title?: string
+    date?: string | Date
+    description?: string
+    tags?: string[]
+    [key: string]: unknown
+  }
+  html?: string
+  rendered?: { html: string }
+}
+
+interface RenderedPost {
+  url: string
+  frontmatter: {
+    title?: string
+    date: string | Date
+    description?: string
+    tags?: string[]
+  }
+  html: string
+  rendered?: { html: string }
+}
+
+function isRenderedPost(post: unknown): post is RenderedPost {
+  const p = post as Partial<VitePressPost>
+  const date = p.frontmatter?.date
+  const hasValidDate = typeof date === 'string' || date instanceof Date
+
+  return (
+    typeof p?.url === 'string' &&
+    typeof p?.frontmatter === 'object' &&
+    p.frontmatter !== null &&
+    hasValidDate &&
+    (typeof p.html === 'string' || typeof p.rendered?.html === 'string')
+  )
+}
+
+export async function generateRSS(outDir: string) {
+  const posts = await createContentLoader('posts/*.md', {
+    render: true,
+    includeSrc: false
+  }).load()
+
+  const filtered = posts
+    .filter(({ frontmatter }) => frontmatter.date)
+    .sort((a, b) => +new Date(b.frontmatter.date) - +new Date(a.frontmatter.date))
+
+  const feed = new RSS({
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    site_url: SITE_URL,
+    feed_url: `${SITE_URL}/feed.xml`,
+    copyright: `Copyright ${new Date().getFullYear()} Shuo`,
+    language: 'zh-CN'
+  })
+
+  for (const post of filtered) {
+    if (!isRenderedPost(post)) {
+      console.warn('Skipping post with invalid structure:', post)
+      continue
+    }
+
+    const { url, frontmatter, html, rendered } = post
+    feed.item({
+      title: frontmatter.title ?? '未命名文章',
+      url: `${SITE_URL}${url}`,
+      date: new Date(frontmatter.date),
+      description: frontmatter.description ?? '',
+      categories: frontmatter.tags ?? [],
+      custom_elements: [{ 'content:encoded': { _cdata: rendered?.html ?? html ?? '' } }]
+    })
+  }
+
+  writeFileSync(resolve(outDir, 'feed.xml'), feed.xml(), 'utf-8')
+}
