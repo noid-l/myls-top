@@ -5,8 +5,6 @@ sidebar: false
 outline: false
 ---
 
-<div class="about-page">
-
 # 关于
 
 我是一个偏工程实践路线的开发者，关注这些方向：
@@ -23,5 +21,3 @@ outline: false
 - Rspress 构建
 - Tailwind 美化
 - ESA Pages 部署
-
-</div>
