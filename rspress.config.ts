@@ -62,6 +62,7 @@ const config = {
     cleanUrls: true
   },
   globalStyles: path.join(__dirname, 'styles/index.css'),
+  themeDir: path.join(__dirname, 'theme'),
   globalUIComponents: [path.join(__dirname, 'src/components/seo-meta.tsx')],
   mediumZoom: {
     selector: '.rspress-doc img'
