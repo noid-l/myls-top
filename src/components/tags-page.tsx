@@ -1,5 +1,5 @@
 import { usePages } from '@rspress/core/runtime'
-import PostCard from '@/components/post-card'
+import PostGrid from '@/components/post-grid'
 import { collectPosts } from '@/lib/posts'
 
 export default function TagsPage() {
@@ -12,7 +12,6 @@ export default function TagsPage() {
       if (!tagMap.has(tag)) {
         tagMap.set(tag, [])
       }
-
       tagMap.get(tag)?.push(post)
     }
   }
@@ -26,48 +25,34 @@ export default function TagsPage() {
     }))
 
   return (
-    <div className="home-shell">
-      <section className="feature-panel mt-6 md:mt-8">
-        <div className="panel-header">
-          <div>
-            <h2 className="panel-title">全部标签</h2>
-            <p className="panel-copy">点击标签可快速跳转到对应分组。</p>
-          </div>
+    <div className="tags-page">
+      <section className="tags-intro">
+        <div className="tags-header">
+          <h1 className="tags-title">全部标签</h1>
+          <p className="tags-subtitle">按标签浏览文章，点击标签快速跳转</p>
         </div>
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="tags-cloud">
           {sections.map(section => (
             <a
               key={section.tag}
               href={`#${section.anchor}`}
-              className="tag-chip hover:bg-slate-100 transition-colors dark:hover:bg-slate-800"
+              className="tags-cloud-item"
             >
-              {section.tag}（{section.items.length}）
+              {section.tag}
+              <span className="tags-cloud-count">{section.items.length}</span>
             </a>
           ))}
         </div>
       </section>
 
-      <div className="section-stack mt-8 md:mt-10">
+      <div className="tags-sections">
         {sections.map(section => (
-          <section key={section.tag} id={section.anchor} className="tag-section">
-            <div className="tag-section-header">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                # {section.tag}
-              </h2>
-              <span className="tag-count">{section.items.length} 篇</span>
+          <section key={section.tag} id={section.anchor} className="tags-section">
+            <div className="tags-section-header">
+              <h2 className="tags-section-title">#{section.tag}</h2>
+              <span className="tags-section-count">{section.items.length} 篇</span>
             </div>
-            <div className="home-grid mt-5">
-              {section.items.map(post => (
-                <PostCard
-                  key={post.url}
-                  title={post.title}
-                  url={post.url}
-                  date={post.date}
-                  description={post.description}
-                  tags={post.tags}
-                />
-              ))}
-            </div>
+            <PostGrid posts={section.items} columns={3} />
           </section>
         ))}
       </div>

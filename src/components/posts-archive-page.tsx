@@ -1,6 +1,7 @@
 import { usePages } from '@rspress/core/runtime'
-import PostCard from '@/components/post-card'
 import { collectPosts } from '@/lib/posts'
+import FeaturedPost from '@/components/featured-post'
+import PostGrid from '@/components/post-grid'
 
 export default function PostsArchivePage() {
   const { pages } = usePages()
@@ -9,59 +10,32 @@ export default function PostsArchivePage() {
   const archivePosts = posts.slice(1)
 
   return (
-    <div className="home-shell page-posts-shell">
+    <div className="archive-page">
       {featuredPost ? (
-        <section className="posts-lead-section">
-          <div className="panel-header">
-            <div>
-              <h2 className="panel-title">最近更新</h2>
-            </div>
-            <span className="tag-count">最新</span>
+        <section className="archive-featured">
+          <div className="archive-header">
+            <h2 className="archive-title">最近更新</h2>
+            <span className="archive-badge">最新</span>
           </div>
 
-          <a href={featuredPost.url} className="posts-lead-card mt-6">
-            <div className="posts-lead-copy">
-              <p className="posts-lead-meta">{featuredPost.date}</p>
-              <h2 className="posts-lead-title">{featuredPost.title}</h2>
-              {featuredPost.description ? (
-                <p className="posts-lead-desc">{featuredPost.description}</p>
-              ) : null}
-            </div>
-
-            <div className="posts-lead-side">
-              <p className="posts-lead-label">阅读线索</p>
-              <div className="posts-lead-tags">
-                {featuredPost.tags.map(tag => (
-                  <span key={tag} className="tag-chip">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </a>
+          <FeaturedPost
+            url={featuredPost.url}
+            title={featuredPost.title}
+            date={featuredPost.date}
+            description={featuredPost.description}
+            tags={featuredPost.tags}
+            label="最近更新"
+          />
         </section>
       ) : null}
 
-      <section className="mt-10">
-        <div className="panel-header posts-archive-header">
-          <div>
-            <h2 className="panel-title">全部文章</h2>
-            <p className="panel-copy">从最近发布开始，按时间往下浏览。</p>
-          </div>
+      <section className="archive-list">
+        <div className="archive-list-header">
+          <h2 className="archive-title">全部文章</h2>
+          <p className="archive-subtitle">从最近发布开始，按时间往下浏览</p>
         </div>
 
-        <div className="posts-grid mt-6">
-          {archivePosts.map(post => (
-            <PostCard
-              key={post.url}
-              title={post.title}
-              url={post.url}
-              date={post.date}
-              description={post.description}
-              tags={post.tags}
-            />
-          ))}
-        </div>
+        <PostGrid posts={archivePosts} columns={3} />
       </section>
     </div>
   )

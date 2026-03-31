@@ -1,14 +1,43 @@
 import './index.css'
-import { HomeLayout as OriginalHomeLayout } from '@rspress/core/theme-original'
-import HeroFeatured from '../src/components/hero-featured'
-import HomePosts from '../src/components/home-posts'
+import { useEffect } from 'react'
+import { usePage } from '@rspress/core/runtime'
+import {
+  HomeLayout as OriginalHomeLayout,
+  Layout as OriginalLayout
+} from '@rspress/core/theme-original'
+import HomePage from '../src/components/home-page'
+
+function RoutePathMarker() {
+  const { page } = usePage()
+  const routePath = page.routePath || '/'
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-route-path', routePath)
+    return () => {
+      document.documentElement.removeAttribute('data-route-path')
+    }
+  }, [routePath])
+
+  return null
+}
+
+export function Layout() {
+  return (
+    <>
+      <RoutePathMarker />
+      <OriginalLayout />
+    </>
+  )
+}
 
 export function HomeLayout() {
   return (
-    <OriginalHomeLayout
-      afterHero={<HeroFeatured />}
-      afterFeatures={<HomePosts />}
-    />
+    <>
+      <RoutePathMarker />
+      <OriginalHomeLayout
+        afterFeatures={<HomePage />}
+      />
+    </>
   )
 }
 
