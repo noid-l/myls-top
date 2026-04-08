@@ -2,8 +2,45 @@ import { defineConfig, type HeadConfig } from 'vitepress'
 import tailwindcss from '@tailwindcss/vite'
 import { generateRSS } from './rss'
 import { generatePagefind } from './pagefind'
+import { generateOG } from './og'
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION, GA_ID } from './site'
 import { parse } from 'node:path'
+import { rmSync } from 'node:fs'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import type { Plugin } from 'vite'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const rootDir = resolve(__dirname, '../..')
+const distDir = resolve(rootDir, 'docs/.vitepress/dist')
+
+function cleanDist() {
+  console.log('🧹 清理构建产物...')
+  try {
+    rmSync(distDir, { recursive: true, force: true })
+    console.log('✅ 构建产物已清理')
+  } catch (error) {
+    console.log('ℹ️  构建产物目录不存在')
+  }
+}
+
+// 自定义 Vite 插件，在构建开始前执行清理和 OG 生成
+let buildStartExecuted = false
+function buildStartPlugin(): Plugin {
+  return {
+    name: 'vitepress-build-start',
+    async buildStart() {
+      // 防止重复执行（VitePress 会调用两次 buildStart）
+      if (buildStartExecuted) return
+      buildStartExecuted = true
+
+      // 清理旧的构建产物
+      cleanDist()
+      // 生成 OG 图片
+      await generateOG()
+    }
+  }
+}
 
 export default defineConfig({
   lang: 'zh-CN',
@@ -18,7 +55,7 @@ export default defineConfig({
   },
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss(), buildStartPlugin()]
   },
 
   head: [
