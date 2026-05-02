@@ -10,27 +10,26 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@fontsource/noto-sans-sc": "^5.2.6",
+    "@fontsource/noto-sans-sc": "^5.2.9",
     "@resvg/resvg-js": "^2.6.2",
-    "@tailwindcss/vite": "^4.2.2",
-    "@types/node": "^25.5.0",
+    "@tailwindcss/vite": "^4.2.4",
+    "@types/node": "^25.6.0",
     "@types/rss": "^0.0.32",
-    "@typescript-eslint/eslint-plugin": "^8.58.0",
-    "@typescript-eslint/parser": "^8.58.0",
-    "eslint": "^10.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
+    "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
-    "eslint-plugin-vue": "^10.8.0",
+    "eslint-plugin-vue": "^10.9.0",
     "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",
-    "pagefind": "^1.4.0",
-    "prettier": "^3.8.1",
+    "pagefind": "^1.5.2",
+    "prettier": "^3.8.3",
     "rss": "^1.2.2",
     "satori": "^0.26.0",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.2.4",
     "vitepress": "2.0.0-alpha.17",
-    "zod": "^4.3.6"
+    "zod": "^4.4.2"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

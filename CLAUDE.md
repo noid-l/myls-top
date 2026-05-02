@@ -78,6 +78,19 @@ description: 文章摘要
 - **pagefind**: ^1.4.0 — 静态全文搜索
 - **rss**: ^1.2.2 — RSS feed 生成
 
+## 隐私规则
+
+创建或编辑博客文章时，必须避免包含以下私人/敏感信息：
+
+- 真实姓名、公司名、客户名（如"惠农"等业务相关名称）
+- 本地文件路径（如 `/Users/xxx`、`/home/xxx`）
+- API Key、Token、密码等凭证信息
+- 代理地址（如 `127.0.0.1:7890`）和内部环境变量配置
+- 内部培训内容、工作量评估、费用预算等公司内部信息
+- Obsidian 特有语法（`[[wikilinks]]`、`> [!note]` callout 等），需转换为标准 Markdown
+
+从 Obsidian 笔记转为博客文章时，应移除上述内容并确保文章适合公开发布。
+
 ## Deployment
 
 `esa.jsonc` 配置 ESA 部署，构建产物目录为 `docs/.vitepress/dist`，使用 SPA 模式 (`notFoundStrategy: "singlePageApplication"`)。
