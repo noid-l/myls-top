@@ -182,6 +182,13 @@ export default defineConfig({
       copyright: `Copyright © ${new Date().getFullYear()} · Built with VitePress + Tailwind · <a href="/feed.xml" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;color:var(--vp-c-text-2);text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="19" r="1"/><path d="M4 4a16 16 0 0 1 16 16"/><path d="M4 11a9 9 0 0 1 9 9"/></svg> RSS</a>`
     },
 
+    notFound: {
+      title: '页面走丢了',
+      quote: '你寻找的页面不存在，可能已被移动或删除。',
+      linkLabel: '回到首页',
+      linkText: '返回首页'
+    },
+
     outline: {
       level: [2, 3],
       label: '目录'

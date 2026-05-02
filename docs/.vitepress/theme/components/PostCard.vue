@@ -5,13 +5,18 @@ defineProps<{
   date: string
   description?: string
   tags?: string[]
+  readingTime?: number
+  category?: string
 }>()
 </script>
 
 <template>
   <a :href="url" class="post-card">
     <h3 class="post-card-title">{{ title }}</h3>
-    <div class="post-card-meta">{{ date }}</div>
+    <div class="post-card-meta">
+      <span v-if="category" class="category-chip">{{ category }}</span>
+      {{ date }}<template v-if="readingTime"> · {{ readingTime }} 分钟</template>
+    </div>
     <p v-if="description" class="post-card-desc">
       {{ description }}
     </p>

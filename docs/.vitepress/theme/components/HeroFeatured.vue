@@ -12,11 +12,11 @@ const featured = posts[0]
   >
     <div class="hero-box group cursor-pointer">
       <div class="max-w-3xl">
-        <span class="page-kicker">Latest</span>
+        <span class="page-kicker">{{ featured.category || 'Latest' }}</span>
         <h1 class="post-card-title mt-4 text-2xl md:text-3xl group-hover:!text-[var(--accent)]">
           {{ featured.title }}
         </h1>
-        <div class="post-card-meta mt-3">{{ featured.date }}</div>
+        <div class="post-card-meta mt-3">{{ featured.date }}<template v-if="featured.readingTime"> · {{ featured.readingTime }} 分钟</template></div>
         <p v-if="featured.description" class="post-card-desc mt-4 text-base md:text-lg leading-8">
           {{ featured.description }}
         </p>

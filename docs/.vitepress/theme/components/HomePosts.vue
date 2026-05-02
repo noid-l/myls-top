@@ -29,6 +29,8 @@ const { latestPosts } = usePosts()
         :date="post.date"
         :description="post.description"
         :tags="post.tags"
+        :reading-time="post.readingTime"
+        :category="post.category"
       />
     </div>
   </section>

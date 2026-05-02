@@ -16,7 +16,7 @@ const { featuredPost, archivePosts } = usePosts()
 
       <a :href="featuredPost.url" class="posts-lead-card mt-6">
         <div class="posts-lead-copy">
-          <p class="posts-lead-meta">{{ featuredPost.date }}</p>
+          <p class="posts-lead-meta">{{ featuredPost.category || 'Latest' }} · {{ featuredPost.date }}<template v-if="featuredPost.readingTime"> · {{ featuredPost.readingTime }} 分钟</template></p>
           <h2 class="posts-lead-title">{{ featuredPost.title }}</h2>
           <p v-if="featuredPost.description" class="posts-lead-desc">
             {{ featuredPost.description }}
@@ -51,6 +51,8 @@ const { featuredPost, archivePosts } = usePosts()
           :date="post.date"
           :description="post.description"
           :tags="post.tags"
+          :reading-time="post.readingTime"
+          :category="post.category"
         />
       </div>
     </section>

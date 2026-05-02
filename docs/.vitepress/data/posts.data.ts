@@ -1,5 +1,6 @@
 import { createContentLoader } from 'vitepress'
 import { z } from 'zod'
+import { getReadingTime } from '../theme/utils/date'
 
 export const PostFrontmatterSchema = z.object({
   title: z.string().min(1, '标题不能为空'),
@@ -25,6 +26,7 @@ export interface PostItem {
   date: string
   tags: string[]
   description: string
+  readingTime: number
   cover?: string
   category?: string
   draft?: boolean
@@ -39,12 +41,11 @@ function formatDate(date: string): string {
 }
 
 export default createContentLoader('posts/*.md', {
-  includeSrc: false,
+  includeSrc: true,
   render: false,
   transform(raw) {
     return raw
       .filter(({ frontmatter }) => {
-        // 跳过索引页和没有日期的页面
         if (!frontmatter.date) return false
 
         try {
@@ -55,7 +56,7 @@ export default createContentLoader('posts/*.md', {
           return false
         }
       })
-      .map(({ url, frontmatter }) => {
+      .map(({ url, frontmatter, src }) => {
         const validated = PostFrontmatterSchema.parse(frontmatter)
         return {
           title: validated.title,
@@ -63,6 +64,7 @@ export default createContentLoader('posts/*.md', {
           date: formatDate(validated.date),
           tags: validated.tags,
           description: validated.description ?? '',
+          readingTime: getReadingTime(src ?? ''),
           cover: validated.cover,
           category: validated.category,
           draft: validated.draft

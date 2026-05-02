@@ -28,18 +28,31 @@ export function formatDate(date: string, locale: string = 'zh-CN'): string {
 
 /**
  * 计算文章阅读时间
- * @param content - 文章内容（纯文本或 HTML）
- * @param wordsPerMinute - 每分钟阅读字数，默认 200
- * @returns 阅读时间字符串（如 "5 分钟阅读"）
+ * @param content - 文章内容（Markdown 原文，含 frontmatter）
+ * @param wordsPerMinute - 每分钟阅读字数，默认 400（中文）
+ * @returns 阅读时间（分钟数）
  */
-export function getReadingTime(content: string, wordsPerMinute: number = 200): string {
+export function getReadingTime(content: string, wordsPerMinute: number = 400): number {
+  let text = content
+  // 移除 frontmatter
+  text = text.replace(/^---[\s\S]*?---/, '')
+  // 移除代码块
+  text = text.replace(/```[\s\S]*?```/g, '')
+  // 移除行内代码
+  text = text.replace(/`[^`]+`/g, '')
+  // 移除图片
+  text = text.replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+  // 移除链接，保留文字
+  text = text.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
   // 移除 HTML 标签
-  const text = content.replace(/<[^>]+>/g, '')
-  // 计算字数（中文按字符计算，英文按单词计算）
-  const wordCount = text.length
+  text = text.replace(/<[^>]+>/g, '')
+  // 移除 markdown 标记符号
+  text = text.replace(/^[#>*_-]+\s*/gm, '')
+  // 移除多余空白
+  text = text.replace(/\s+/g, '')
 
-  const minutes = Math.ceil(wordCount / wordsPerMinute)
-  return `${minutes} 分钟阅读`
+  const minutes = Math.max(1, Math.ceil(text.length / wordsPerMinute))
+  return minutes
 }
 
 /**
