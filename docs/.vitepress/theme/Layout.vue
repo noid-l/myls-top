@@ -6,7 +6,6 @@ import NotFound from './components/NotFound.vue'
 import PostNav from './components/PostNav.vue'
 import PostFooter from './components/PostFooter.vue'
 import ShareButtons from './components/ShareButtons.vue'
-import GiscusComments from './components/GiscusComments.vue'
 import BackToTop from './components/BackToTop.vue'
 
 const route = useRoute()
@@ -28,7 +27,6 @@ const isPostPage = computed(() =>
         <PostNav />
         <PostFooter />
         <ShareButtons />
-        <GiscusComments />
       </template>
     </template>
 

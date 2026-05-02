@@ -13,7 +13,6 @@ import NotFound from './components/NotFound.vue'
 import PostNav from './components/PostNav.vue'
 import PostFooter from './components/PostFooter.vue'
 import ShareButtons from './components/ShareButtons.vue'
-import GiscusComments from './components/GiscusComments.vue'
 import BackToTop from './components/BackToTop.vue'
 
 export default {
@@ -29,7 +28,6 @@ export default {
     app.component('PostNav', PostNav)
     app.component('PostFooter', PostFooter)
     app.component('ShareButtons', ShareButtons)
-    app.component('GiscusComments', GiscusComments)
     app.component('BackToTop', BackToTop)
   },
   setup() {
