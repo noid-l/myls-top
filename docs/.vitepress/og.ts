@@ -2,8 +2,7 @@ import { Resvg } from '@resvg/resvg-js'
 import fg from 'fast-glob'
 import matter from 'gray-matter'
 import satori from 'satori'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { parse, resolve } from 'node:path'
 
 const POSTS_DIR = 'docs/posts'
@@ -12,64 +11,41 @@ const SITE_NAME = '不想起名字'
 const OG_WIDTH = 1200
 const OG_HEIGHT = 630
 
-let fontCache = null
+let fontCache: Array<{ name: string; data: ArrayBuffer; weight: number; style: string }> | null = null
 
-function normalizeText(value) {
+function normalizeText(value: unknown) {
   return String(value ?? '')
     .replace(/\s+/g, ' ')
     .trim()
 }
 
-function clampText(value, maxLength) {
+function clampText(value: unknown, maxLength: number) {
   const text = normalizeText(value)
 
-  if (!text) {
-    return ''
-  }
-
-  if (text.length <= maxLength) {
-    return text
-  }
+  if (!text) return ''
+  if (text.length <= maxLength) return text
 
   return `${text.slice(0, maxLength - 1).trimEnd()}…`
 }
 
-function normalizeTags(value) {
-  if (Array.isArray(value)) {
-    return value
-  }
-
-  if (typeof value === 'string' && value.trim()) {
-    return [value.trim()]
-  }
-
+function normalizeTags(value: unknown): string[] {
+  if (Array.isArray(value)) return value
+  if (typeof value === 'string' && value.trim()) return [value.trim()]
   return []
 }
 
-function getTitleSize(title) {
+function getTitleSize(title: string) {
   const length = normalizeText(title).length
-
-  if (length > 40) {
-    return 36
-  }
-
-  if (length > 28) {
-    return 42
-  }
-
+  if (length > 40) return 36
+  if (length > 28) return 42
   return 52
 }
 
-function el(type, props = {}, ...children) {
+function el(type: string, props: Record<string, any> = {}, ...children: any[]) {
   const normalizedChildren = children.flat().filter(child => child !== null && child !== undefined && child !== false)
   const style = props.style ? { ...props.style } : undefined
 
-  if (
-    type === 'div' &&
-    normalizedChildren.length > 1 &&
-    style &&
-    !style.display
-  ) {
+  if (type === 'div' && normalizedChildren.length > 1 && style && !style.display) {
     style.display = 'flex'
   }
 
@@ -83,51 +59,53 @@ function el(type, props = {}, ...children) {
   }
 }
 
-function resolveFontFile(weight) {
-  const patterns = [
-    `node_modules/@fontsource/noto-sans-sc/files/*chinese-simplified*${weight}-normal.woff`,
-    `node_modules/@fontsource/noto-sans-sc/files/*latin*${weight}-normal.woff`,
-    `node_modules/@fontsource/noto-sans-sc/files/*${weight}-normal.woff`
-  ]
+function resolveFontFiles(weight: number): string[] {
+  const subsets = ['chinese-simplified', 'latin']
+  const results: string[] = []
 
-  for (const pattern of patterns) {
+  for (const subset of subsets) {
+    const pattern = `node_modules/@fontsource/noto-sans-sc/files/*${subset}*${weight}-normal.woff`
     const [match] = fg.sync(pattern, { onlyFiles: true })
-
-    if (match) {
-      return match
-    }
+    if (match) results.push(match)
   }
 
-  throw new Error(`Unable to locate a usable Noto Sans SC font file for weight ${weight}.`)
+  if (results.length === 0) {
+    const [fallback] = fg.sync(
+      `node_modules/@fontsource/noto-sans-sc/files/*${weight}-normal.woff`,
+      { onlyFiles: true }
+    )
+    if (fallback) results.push(fallback)
+  }
+
+  if (results.length === 0) {
+    throw new Error(`Unable to locate Noto Sans SC font files for weight ${weight}.`)
+  }
+
+  return results
 }
 
 function loadFonts() {
-  if (fontCache) {
-    return fontCache
+  if (fontCache) return fontCache
+
+  const fonts: Array<{ name: string; data: ArrayBuffer; weight: number; style: string }> = []
+
+  for (const weight of [400, 700]) {
+    const files = resolveFontFiles(weight)
+    for (const file of files) {
+      fonts.push({
+        name: 'Noto Sans SC',
+        data: readFileSync(file),
+        weight,
+        style: 'normal'
+      })
+    }
   }
 
-  const regularPath = resolveFontFile(400)
-  const boldPath = resolveFontFile(700)
-
-  fontCache = [
-    {
-      name: 'Noto Sans SC',
-      data: readFileSync(regularPath),
-      weight: 400,
-      style: 'normal'
-    },
-    {
-      name: 'Noto Sans SC',
-      data: readFileSync(boldPath),
-      weight: 700,
-      style: 'normal'
-    }
-  ]
-
+  fontCache = fonts
   return fontCache
 }
 
-export function buildOgTree({ title, description, tags }) {
+export function buildOgTree({ title, description, tags }: { title: string; description?: string; tags?: string[] }) {
   const displayTitle = clampText(title, 64)
   const displayDescription = clampText(description, 110)
   const displayTags = normalizeTags(tags).slice(0, 3).map(tag => clampText(tag, 18))
@@ -265,18 +243,15 @@ export function buildOgTree({ title, description, tags }) {
   )
 }
 
-function renderPng(svg, outputPath) {
+function renderPng(svg: string, outputPath: string) {
   const pngData = new Resvg(svg, {
-    fitTo: {
-      mode: 'width',
-      value: OG_WIDTH
-    }
+    fitTo: { mode: 'width', value: OG_WIDTH }
   }).render().asPng()
 
   writeFileSync(outputPath, pngData)
 }
 
-async function writeOgImage(input, outputPath) {
+async function writeOgImage(input: { title: string; description?: string; tags?: string[] }, outputPath: string) {
   const svg = await satori(buildOgTree(input), {
     width: OG_WIDTH,
     height: OG_HEIGHT,
@@ -284,6 +259,17 @@ async function writeOgImage(input, outputPath) {
   })
 
   renderPng(svg, outputPath)
+}
+
+function isStale(sourcePath: string, outputPath: string): boolean {
+  if (!existsSync(outputPath)) return true
+  try {
+    const srcTime = statSync(sourcePath).mtimeMs
+    const outTime = statSync(outputPath).mtimeMs
+    return srcTime > outTime
+  } catch {
+    return true
+  }
 }
 
 export async function generateOG() {
@@ -300,14 +286,16 @@ export async function generateOG() {
 
   let generated = 0
   let skipped = 0
+  let cached = 0
   let failed = 0
 
   for (const file of files) {
     const slug = parse(file).name
+    const sourcePath = resolve(POSTS_DIR, file)
     const outputPath = resolve(OUTPUT_DIR, `${slug}.png`)
 
     try {
-      const raw = readFileSync(resolve(POSTS_DIR, file), 'utf-8')
+      const raw = readFileSync(sourcePath, 'utf-8')
       const { data: fm } = matter(raw)
 
       if (fm.draft === true) {
@@ -322,23 +310,26 @@ export async function generateOG() {
         continue
       }
 
+      if (!isStale(sourcePath, outputPath)) {
+        console.log(`  ⚡ Cached: ${slug}.png`)
+        cached++
+        continue
+      }
+
       await writeOgImage(
-        {
-          title: fm.title,
-          description: fm.description,
-          tags: fm.tags
-        },
+        { title: fm.title, description: fm.description, tags: fm.tags },
         outputPath
       )
 
       console.log(`  ✅ ${slug}.png`)
       generated++
-    } catch (err) {
+    } catch (err: any) {
       console.error(`  ❌ Failed: ${slug} — ${err.message}`)
       failed++
     }
   }
 
+  const defaultOutputPath = resolve(OUTPUT_DIR, 'default.png')
   try {
     await writeOgImage(
       {
@@ -346,17 +337,16 @@ export async function generateOG() {
         description: 'AI 工具链 · 开发实践 · 网络与基础设施',
         tags: ['AI', 'Coding', 'Notes']
       },
-      resolve(OUTPUT_DIR, 'default.png')
+      defaultOutputPath
     )
-
     console.log('  ✅ default.png')
     generated++
-  } catch (err) {
+  } catch (err: any) {
     console.error(`  ❌ Failed: default.png — ${err.message}`)
     failed++
   }
 
-  console.log(`\n  📊 Generated: ${generated} | Skipped: ${skipped} | Failed: ${failed}\n`)
+  console.log(`\n  📊 Generated: ${generated} | Cached: ${cached} | Skipped: ${skipped} | Failed: ${failed}\n`)
 
   if (failed > 0) {
     throw new Error(`OG generation failed for ${failed} item(s).`)

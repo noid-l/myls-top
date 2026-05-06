@@ -111,6 +111,7 @@ export default defineConfig({
       head.push(['meta', { property: 'og:description', content: fm.description ?? SITE_DESCRIPTION }])
       head.push(['meta', { property: 'og:image', content: `${SITE_URL}/og/${slug}.png` }])
       head.push(['meta', { property: 'og:type', content: 'article' }])
+      head.push(['meta', { property: 'og:url', content: `${SITE_URL}/${relativePath.replace(/\.md$/, '')}` }])
       head.push(['meta', { name: 'twitter:card', content: 'summary_large_image' }])
       head.push(['meta', { name: 'twitter:title', content: fm.title ?? SITE_TITLE }])
       head.push(['meta', { name: 'twitter:description', content: fm.description ?? SITE_DESCRIPTION }])
@@ -122,9 +123,11 @@ export default defineConfig({
         '@type': 'BlogPosting',
         'headline': fm.title ?? SITE_TITLE,
         'datePublished': fm.date,
-        'dateModified': fm.date,
+        'dateModified': pageData.lastUpdated
+          ? new Date(pageData.lastUpdated).toISOString().slice(0, 10)
+          : fm.date,
         'description': fm.description ?? SITE_DESCRIPTION,
-        'url': `${SITE_URL}${pageData.relativePath.replace(/\.md$/, '')}`,
+        'url': `${SITE_URL}/${relativePath.replace(/\.md$/, '')}`,
         'author': {
           '@type': 'Person',
           'name': 'Shuo',

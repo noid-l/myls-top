@@ -6,6 +6,7 @@ docs/.obsidian
 .claude
 *.png
 !docs/public/**
+docs/public/og/*.png
 
 # Environment variables
 .env
