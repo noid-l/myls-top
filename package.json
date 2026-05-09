@@ -3,7 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "sync-content": "git submodule update --init --recursive && node scripts/copy-content.mjs",
+    "predev": "npm run sync-content",
     "dev": "vitepress dev docs",
+    "prebuild": "npm run sync-content",
     "build": "vitepress build docs",
     "preview": "vitepress preview docs",
     "clean": "node scripts/clean.mjs",

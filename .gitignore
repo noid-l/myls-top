@@ -8,6 +8,12 @@ docs/.obsidian
 !docs/public/**
 docs/public/og/*.png
 
+# Content copied from submodule (blog-content)
+docs/posts/2024-*.md
+docs/posts/2025-*.md
+docs/posts/2026-*.md
+docs/about.md
+
 # Environment variables
 .env
 .env.local
