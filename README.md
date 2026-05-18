@@ -1,4 +1,4 @@
-# AI Blog - VitePress + Tailwind CSS
+# blog-vitepress
 
 > 一个基于 VitePress 和 Tailwind CSS 4 的现代化个人博客系统
 
