@@ -4,17 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-个人博客站点，域名 www.myls.top。使用 VitePress 2.x (alpha) + Tailwind CSS 4 构建静态站点，通过 ESA（Edge Side Architecture）部署。
+个人博客站点的 VitePress 实现，域名 www.myls.top。这是 monorepo 中的生产部署版本，文章源来自同仓库的 `blog-content/`（通过 git submodule + `scripts/copy-content.mjs` 同步到 `docs/posts/`）。
+
+技术栈：VitePress 2.0.0-alpha.17 + Tailwind CSS 4.2.4 + Vue 3。
 
 ## Commands
 
 ```bash
-bun run dev          # 开发服务器 (VitePress dev)
-bun run build        # 构建静态站点（RSS + Pagefind 在 buildEnd 钩子中自动生成）
+bun run dev          # 开发服务器（先 sync-content，localhost:5173）
+bun run build        # 完整构建（sync-content → 清理 → OG → VitePress → RSS → Pagefind）
 bun run preview      # 预览构建产物
+bun run clean        # 清理构建产物
+bun run typecheck    # TypeScript 类型检查
 ```
 
-**注意**: Pagefind 搜索索引和 RSS feed 在 VitePress `buildEnd` 钩子中生成（见 `config.mts`），搜索功能只在 `build` 后的 `preview` 中可用，`dev` 模式下不可用。
+**注意**: Pagefind 搜索索引和 RSS feed 在 VitePress `buildEnd` 钩子中生成，搜索功能只在 `build` 后的 `preview` 中可用，`dev` 模式下不可用。OG 图片在自定义 Vite 插件的 `buildStart` 钩子中生成。
 
 ## Architecture
 
@@ -35,7 +39,7 @@ docs/
 │           ├── HomePosts.vue      # 首页文章列表（取前6篇）
 │           ├── PostCard.vue       # 文章卡片（用于列表/标签页）
 │           └── PagefindSearch.vue # Pagefind 搜索 UI 封装
-├── posts/                  # 博客文章（Markdown + frontmatter）
+├── posts/                  # 从 blog-content 同步的文章（不要直接编辑）
 ├── index.md                # 首页
 ├── tags.md                 # 标签聚合页
 ├── search.md               # 搜索页
@@ -58,7 +62,9 @@ docs/
 
 ## Adding a New Post
 
-在 `docs/posts/` 下创建 `YYYY-MM-DD-slug.md`，frontmatter 模板：
+**不要在 `docs/posts/` 中直接创建文章** — 该目录内容由 `blog-content/` git submodule 同步生成。
+
+在 `blog-content/posts/` 下创建 `YYYY-MM-DD-slug.md`，frontmatter 模板：
 
 ```yaml
 ---
@@ -71,25 +77,17 @@ description: 文章摘要
 ---
 ```
 
+然后提交到 `blog-content/` 仓库，消费仓库通过 `npm run sync-content` 拉取更新。
+
 ## Key Dependencies
 
-- **vitepress**: 2.0.0-alpha.12 — 精确锁定 alpha 版本
-- **tailwindcss** + **@tailwindcss/vite**: ^4.1.0 — Tailwind v4
-- **pagefind**: ^1.4.0 — 静态全文搜索
+- **vitepress**: 2.0.0-alpha.17 — 精确锁定 alpha 版本
+- **tailwindcss** + **@tailwindcss/vite**: ^4.2.4 — Tailwind v4
+- **pagefind**: ^1.5.2 — 静态全文搜索
 - **rss**: ^1.2.2 — RSS feed 生成
-
-## 隐私规则
-
-创建或编辑博客文章时，必须避免包含以下私人/敏感信息：
-
-- 真实姓名、公司名、客户名（如"惠农"等业务相关名称）
-- 本地文件路径（如 `/Users/xxx`、`/home/xxx`）
-- API Key、Token、密码等凭证信息
-- 代理地址（如 `127.0.0.1:7890`）和内部环境变量配置
-- 内部培训内容、工作量评估、费用预算等公司内部信息
-- Obsidian 特有语法（`[[wikilinks]]`、`> [!note]` callout 等），需转换为标准 Markdown
-
-从 Obsidian 笔记转为博客文章时，应移除上述内容并确保文章适合公开发布。
+- **satori** + **@resvg/resvg-js**: OG 图片生成
+- **zod**: 运行时数据验证
+- **gray-matter**: frontmatter 解析
 
 ## Deployment
 
